@@ -1,0 +1,3456 @@
+[
+    {
+  "id": 1,
+  "titre": "Etat des affaires par statut avec détails financiers",
+  "description": "Pour chaque affaire, affiche son statut actuel, la dernière date de changement de statut, et les informations financières principales comme le montant, la durée, le taux et le loyer.",
+  "categorie": "Affaires",
+  "tags": ["affaires", "finances", "statut"],
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux (contrats, projets, affaires clients)",
+    "HISTOSTAT": "Historique des changements de statut pour les affaires"
+  },
+  "colonnes": {
+    "TIERS_CLIENT": {
+      "description": "Code du client lié à l’affaire",
+      "alias_sql": "a.tiers_client",
+      "reference": "AFFAIRE.id_client",
+      "type_relation": "FK",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant externe de l’affaire",
+      "alias_sql": "a.ie_affaire",
+      "reference": "AFFAIRE.id_affaire",
+      "type_relation": "direct",
+      "filtrable": true
+    },
+    "LIBELLE": {
+      "description": "Description de l’affaire",
+      "alias_sql": "a.libelle",
+      "reference": "AFFAIRE.libelle",
+      "type_relation": "direct",
+      "filtrable": false
+    },
+    "CODE_STATUT": {
+      "description": "Statut actuel de l’affaire (EN_COURS, AMEL, AFIN)",
+      "alias_sql": "a.code_statut",
+      "reference": "AFFAIRE.code_statut",
+      "type_relation": "direct",
+      "filtrable": true
+    },
+    "DATE_STATUT": {
+      "description": "Dernière date de changement de statut",
+      "alias_sql": "to_date(MAX(h.date_statut), 'j')",
+      "reference": "HISTOSTAT.date_statut",
+      "type_relation": "function",
+      "filtrable": true
+    },
+    "CODE_CATEGORIE_AFFAIRE": {
+      "description": "Catégorie de l’affaire",
+      "alias_sql": "a.code_categorie_affaire",
+      "reference": "AFFAIRE.code_categorie_affaire",
+      "type_relation": "direct",
+      "filtrable": true
+    },
+    "OBJET": {
+      "description": "Objet ou libellé du bien lié à l’affaire",
+      "alias_sql": "ops$ml.aget_bien_libelle(a.id_affaire)",
+      "reference": "fonction ops$ml.aget_bien_libelle",
+      "type_relation": "function",
+      "filtrable": false
+    },
+    "TAUX": {
+      "description": "Taux applicable à l’affaire",
+      "alias_sql": "ops$ml.aget_taux(a.id_affaire)",
+      "reference": "fonction ops$ml.aget_taux",
+      "type_relation": "function",
+      "filtrable": false
+    },
+    "TEG": {
+      "description": "Taux effectif global",
+      "alias_sql": "ops$ml.aget_teg(a.id_affaire)",
+      "reference": "fonction ops$ml.aget_teg",
+      "type_relation": "function",
+      "filtrable": false
+    },
+    "MT_HT": {
+      "description": "Montant hors taxes",
+      "alias_sql": "ops$ml.aget_financement(a.id_affaire)",
+      "reference": "fonction ops$ml.aget_financement",
+      "type_relation": "function",
+      "filtrable": true
+    },
+    "MT_TTC": {
+      "description": "Montant toutes taxes comprises",
+      "alias_sql": "ops$ml.aget_financementttc(a.id_affaire)",
+      "reference": "fonction ops$ml.aget_financementttc",
+      "type_relation": "function",
+      "filtrable": true
+    },
+    "DUREE": {
+      "description": "Durée du financement",
+      "alias_sql": "ops$ml.aget_duree(a.id_affaire)",
+      "reference": "fonction ops$ml.aget_duree",
+      "type_relation": "function",
+      "filtrable": true
+    },
+    "LOYER": {
+      "description": "Montant du loyer TTC",
+      "alias_sql": "ops$ml.aget_loyerttc2(a.id_affaire)",
+      "reference": "fonction ops$ml.aget_loyerttc2",
+      "type_relation": "function",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "id_affaire": {
+      "description": "Identifiant d’une affaire pour filtrer si nécessaire",
+      "obligatoire": false
+    },
+    "date_reference": {
+      "description": "Date de référence pour filtrer les statuts ou montants financiers (JJ/MM/AAAA)",
+      "obligatoire": false
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les affaires en cours avec leur montant et durée",
+    "Quelles sont les affaires actives et leurs loyers ?",
+    "Donne la liste des affaires avec leur dernier changement de statut et informations financières"
+  ],
+  "filtres_possibles": [
+    "CODE_STATUT",
+    "TIERS_CLIENT",
+    "CODE_CATEGORIE_AFFAIRE",
+    "DATE_STATUT",
+    "DUREE",
+    "MT_HT",
+    "MT_TTC"
+  ],
+  "requete_sql": "SELECT DISTINCT NULL, a.tiers_client, a.ie_affaire, a.libelle, a.code_statut, to_date(MAX(h.date_statut), 'j') dtstatut, a.code_categorie_affaire, ops$ml.aget_bien_libelle(a.id_affaire) objet, ops$ml.aget_taux(a.id_affaire) taux, ops$ml.aget_teg(a.id_affaire) teg, ops$ml.aget_financement(a.id_affaire) mt_ht, ops$ml.aget_financementttc(a.id_affaire) mt_ttc, ops$ml.aget_duree(a.id_affaire) duree, ops$ml.aget_loyerttc2(a.id_affaire) loyer FROM affaire a, histostat h WHERE h.id_objet = a.id_affaire AND h.code_type_dossier = 'AFF' GROUP BY a.tiers_client, a.ie_affaire, a.libelle, a.code_statut, a.code_categorie_affaire, a.id_affaire ORDER BY a.tiers_client, a.ie_affaire"
+}
+,
+
+{
+  "id": 2,
+  "titre": "Etat de risque par affaire",
+  "description": "Vision risque/finance pour chaque contrat afin de connaître le montant restant dû et les impayés.",
+  "categorie": "Affaires",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux (contrats, projets, affaires clients)"
+  },
+  "colonnes": {
+    "TIERS_CLIENT": {
+      "description": "Code du client lié à l’affaire",
+      "alias_sql": "tiers_client",
+      "reference": "AFFAIRE.TIERS_CLIENT",
+      "type_relation": "FK",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant externe de l’affaire",
+      "alias_sql": "ie_affaire",
+      "reference": "AFFAIRE.IE_AFFAIRE",
+      "type_relation": "direct",
+      "filtrable": true
+    },
+    "LIBELLE": {
+      "description": "Description de l’affaire",
+      "alias_sql": "libelle",
+      "reference": "AFFAIRE.LIBELLE",
+      "type_relation": "direct",
+      "filtrable": false
+    },
+    "CODE_STATUT": {
+      "description": "Statut actuel de l’affaire",
+      "alias_sql": "code_statut",
+      "reference": "AFFAIRE.CODE_STATUT",
+      "type_relation": "direct",
+      "filtrable": true
+    },
+    "CODE_CATEGORIE_AFFAIRE": {
+      "description": "Catégorie de l’affaire",
+      "alias_sql": "code_categorie_affaire",
+      "reference": "AFFAIRE.CODE_CATEGORIE_AFFAIRE",
+      "type_relation": "direct",
+      "filtrable": true
+    },
+    "APPORTEUR": {
+      "description": "Apporteur lié à l’affaire",
+      "alias_sql": "apporteur",
+      "reference": "ops$ml.aget_apporteur(a.id_affaire)",
+      "type_relation": "function",
+      "filtrable": false
+    },
+    "DTMEL": {
+      "description": "Date de mise en exploitation/livraison ou date de référence",
+      "alias_sql": "dtmel",
+      "reference": "AFFAIRE.DATE_MEL",
+      "type_relation": "direct",
+      "filtrable": true
+    },
+    "ENCOURS": {
+      "description": "Montant restant dû à la date de référence",
+      "alias_sql": "Encours",
+      "reference": "ops$ml.aget_encours(a.id_affaire, :date_reference)",
+      "type_relation": "function",
+      "filtrable": true
+    },
+    "IMPAYES": {
+      "description": "Montant des loyers impayés à la date de référence",
+      "alias_sql": "Impayes",
+      "reference": "ops$ml.aget_soldeloyer(a.id_affaire, :date_reference)",
+      "type_relation": "function",
+      "filtrable": true
+    },
+    "SOLDE": {
+      "description": "Solde global de l’affaire à la date de référence",
+      "alias_sql": "Solde",
+      "reference": "ops$ml.aget_soldecmtb(a.id_affaire, :date_reference)",
+      "type_relation": "function",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "id_affaire": {
+      "description": "Identifiant d’une affaire pour filtrer si nécessaire",
+      "obligatoire": false
+    },
+    "date_reference": {
+      "description": "Date de référence pour calcul des encours et impayés (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi le risque et l'encours de chaque affaire",
+    "Quels sont les contrats avec des impayés ?",
+    "Donne le solde restant dû par client et par affaire"
+  ],
+  "filtres_possibles": [
+    "CODE_STATUT",
+    "TIERS_CLIENT",
+    "CODE_CATEGORIE_AFFAIRE",
+    "ENCOURS",
+    "IMPAYES",
+    "SOLDE"
+  ],
+  "requete_sql": "SELECT a.tiers_client, a.ie_affaire, a.libelle, a.code_statut, a.code_categorie_affaire, ops$ml.aget_apporteur(a.id_affaire) apporteur, to_date(a.date_mel, 'j') dtmel, ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) Encours, ops$ml.aget_soldeloyer(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) Impayes, ops$ml.aget_soldecmtb(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) Solde FROM affaire a WHERE a.code_statut_impose IN ('AMEL', 'AFIN') ORDER BY a.tiers_client, a.ie_affaire"
+}
+,
+
+{
+  "id": 3,
+  "titre": "Etat des échéances par mois (Détaillé)",
+  "description": "Vue détaillée de l’échéancier des affaires, mois par mois, avec la répartition capital/intérêt et le solde restant à rembourser.",
+  "categorie": "Affaires",
+  "tables": {
+    "TABECH": "Table des échéances pour chaque affaire",
+    "AFFAIRE": "Dossiers commerciaux (contrats, projets, affaires clients)"
+  },
+  "colonnes": {
+    "TIERS_CLIENT": {
+      "description": "Code du client lié à l’affaire",
+      "alias_sql": "tiers_client",
+      "reference": "AFFAIRE.TIERS_CLIENT",
+      "type_relation": "FK",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant externe de l’affaire",
+      "alias_sql": "ie_affaire",
+      "reference": "AFFAIRE.IE_AFFAIRE",
+      "type_relation": "direct",
+      "filtrable": true
+    },
+    "LIBELLE": {
+      "description": "Description de l’affaire",
+      "alias_sql": "libelle",
+      "reference": "AFFAIRE.LIBELLE",
+      "type_relation": "direct",
+      "filtrable": false
+    },
+    "ECHEANCE": {
+      "description": "Date de l’échéance",
+      "alias_sql": "echeance",
+      "reference": "TABECH.DATE_ECHEANCE",
+      "type_relation": "direct",
+      "filtrable": true
+    },
+    "LOYER": {
+      "description": "Montant total de l’échéance (capital + intérêt)",
+      "alias_sql": "loyer",
+      "reference": "(e.crb + e.interet)",
+      "type_relation": "calculated",
+      "filtrable": true
+    },
+    "CRB": {
+      "description": "Part du capital à rembourser pour cette échéance",
+      "alias_sql": "crb",
+      "reference": "TABECH.CRB",
+      "type_relation": "direct",
+      "filtrable": true
+    },
+    "INTERET": {
+      "description": "Part des intérêts pour cette échéance",
+      "alias_sql": "interet",
+      "reference": "TABECH.INTERET",
+      "type_relation": "direct",
+      "filtrable": true
+    },
+    "CRD": {
+      "description": "Capital restant dû après cette échéance",
+      "alias_sql": "crd",
+      "reference": "TABECH.CRD",
+      "type_relation": "direct",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "id_affaire": {
+      "description": "Identifiant d’une affaire pour filtrer si nécessaire",
+      "obligatoire": false
+    },
+    "mois_reference": {
+      "description": "Mois de l’échéance pour filtrer (optionnel)",
+      "obligatoire": false
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi l’échéancier détaillé pour chaque affaire",
+    "Quels sont les loyers à payer ce mois-ci ?",
+    "Quelle part est capital et quelle part est intérêt pour chaque échéance ?"
+  ],
+  "filtres_possibles": [
+    "TIERS_CLIENT",
+    "IE_AFFAIRE",
+    "ECHEANCE",
+    "LOYER",
+    "CRB",
+    "INTERET",
+    "CRD"
+  ],
+  "requete_sql": "SELECT a.tiers_client, a.ie_affaire, a.libelle, to_date(to_char(e.date_echeance), 'J') echeance, (e.crb + e.interet) loyer, e.crb, e.interet, e.crd FROM tabech e, affaire a WHERE e.id_affaire = a.id_affaire AND a.code_statut_impose IN ('AMEL', 'AFIN') AND e.code_statut = 'EXPL' AND e.no_echeance <> 0 ORDER BY a.ie_affaire, e.no_echeance"
+}
+,
+{
+  "id": 4,
+  "titre": "Etat des échéances par mois (Total)",
+  "description": "Tableau récapitulatif par date d’échéance : nombre d’échéances, total des loyers à encaisser, répartition capital/intérêt, et capital restant dû global.",
+  "categorie": "Affaires",
+  "tables": {
+    "TABECH": "Table des échéances pour chaque affaire",
+    "AFFAIRE": "Dossiers commerciaux (contrats, projets, affaires clients)"
+  },
+  "colonnes": {
+    "DATE_ECHEANCE": {
+      "description": "Date de l’échéance",
+      "alias_sql": "date_echeance",
+      "reference": "TABECH.DATE_ECHEANCE",
+      "type_relation": "direct",
+      "filtrable": true
+    },
+    "CRD_TOTAL": {
+      "description": "Capital restant dû global à cette date",
+      "alias_sql": "crd_total",
+      "reference": "SUM(e.crd)",
+      "type_relation": "calculated",
+      "filtrable": true
+    },
+    "LOYER_TOTAL": {
+      "description": "Total des loyers à encaisser (capital + intérêt)",
+      "alias_sql": "loyer_total",
+      "reference": "SUM(e.crb + e.interet)",
+      "type_relation": "calculated",
+      "filtrable": true
+    },
+    "CRB_TOTAL": {
+      "description": "Total du capital à rembourser pour cette date",
+      "alias_sql": "crb_total",
+      "reference": "SUM(e.crb)",
+      "type_relation": "calculated",
+      "filtrable": true
+    },
+    "INTERET_TOTAL": {
+      "description": "Total des intérêts pour cette date",
+      "alias_sql": "interet_total",
+      "reference": "SUM(e.interet)",
+      "type_relation": "calculated",
+      "filtrable": true
+    },
+    "NB_ECHEANCES": {
+      "description": "Nombre d’échéances (contrats) pour cette date",
+      "alias_sql": "nb_echeances",
+      "reference": "COUNT(*)",
+      "type_relation": "calculated",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "mois_reference": {
+      "description": "Mois de l’échéance pour filtrer si nécessaire",
+      "obligatoire": false
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi le total des échéances par mois",
+    "Quel est le montant global à encaisser ce mois ?",
+    "Quelle est la répartition capital/intérêt pour toutes les affaires ?"
+  ],
+  "filtres_possibles": [
+    "DATE_ECHEANCE",
+    "LOYER_TOTAL",
+    "CRB_TOTAL",
+    "INTERET_TOTAL",
+    "CRD_TOTAL",
+    "NB_ECHEANCES"
+  ],
+  "requete_sql": "SELECT to_date(e.date_echeance, 'J') AS date_echeance, SUM(e.crd) AS crd_total, SUM(e.crb + e.interet) AS loyer_total, SUM(e.crb) AS crb_total, SUM(e.interet) AS interet_total, COUNT(*) AS nb_echeances FROM tabech e, affaire a WHERE e.id_affaire = a.id_affaire AND a.code_statut_impose IN ('AMEL', 'AFIN') AND e.code_statut = 'EXPL' AND e.no_echeance <> 0 GROUP BY e.date_echeance ORDER BY e.date_echeance"
+}
+,
+{
+  "id": 5,
+  "titre": "Durée moyenne des contrats",
+  "description": "Calcule la durée moyenne pondérée des contrats en fonction des montants de financement et la part de chaque durée dans le financement total.",
+  "categorie": "Affaires",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux (contrats, projets, affaires clients)"
+  },
+  "colonnes": {
+    "DUREE": {
+      "description": "Durée du contrat (en mois ou années selon le paramétrage)",
+      "alias_sql": "duree",
+      "reference": "ops$ml.aget_duree(a.id_affaire)",
+      "type_relation": "calculée",
+      "filtrable": true
+    },
+    "FINANCEMENT_TOTAL": {
+      "description": "Montant total financé pour cette durée",
+      "alias_sql": "financement_total",
+      "reference": "SUM(ops$ml.aget_financement(a.id_affaire))",
+      "type_relation": "calculée",
+      "filtrable": true
+    },
+    "RATIO_FINANCEMENT": {
+      "description": "Part de cette durée dans le financement global",
+      "alias_sql": "ratio_financement",
+      "reference": "RATIO_TO_REPORT(SUM(ops$ml.aget_financement(a.id_affaire))) OVER()",
+      "type_relation": "calculée",
+      "filtrable": true
+    },
+    "DUREE_PONDEREE": {
+      "description": "Durée pondérée en fonction du ratio de financement",
+      "alias_sql": "duree_ponderee",
+      "reference": "ops$ml.aget_duree(a.id_affaire) * RATIO_TO_REPORT(SUM(ops$ml.aget_financement(a.id_affaire))) OVER()",
+      "type_relation": "calculée",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de référence pour inclure les contrats actifs (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quelle est la durée moyenne des contrats ?",
+    "Montre-moi la répartition des financements par durée",
+    "Quelle part du financement correspond à chaque durée de contrat ?"
+  ],
+  "filtres_possibles": [
+    "DUREE",
+    "FINANCEMENT_TOTAL",
+    "RATIO_FINANCEMENT",
+    "DUREE_PONDEREE"
+  ],
+  "requete_sql": "SELECT ops$ml.aget_duree(a.id_affaire) AS duree, SUM(ops$ml.aget_financement(a.id_affaire)) AS financement_total, RATIO_TO_REPORT(SUM(ops$ml.aget_financement(a.id_affaire))) OVER() AS ratio_financement, ops$ml.aget_duree(a.id_affaire) * RATIO_TO_REPORT(SUM(ops$ml.aget_financement(a.id_affaire))) OVER() AS duree_ponderee FROM affaire a WHERE a.code_statut_impose IN ('AMEL', 'AFIN') GROUP BY ops$ml.aget_duree(a.id_affaire) ORDER BY 1"
+}
+,
+{
+  "id": 6,
+  "titre": "Durée restante de l'encours",
+  "description": "Calcule la répartition des encours par durée restante et déduit la durée moyenne pondérée de remboursement de tout le portefeuille.",
+  "categorie": "Affaires / Finance",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux (contrats, projets, affaires clients)"
+  },
+  "colonnes": {
+    "DUREE_RESTANTE": {
+      "description": "Durée restante de remboursement du contrat",
+      "alias_sql": "dureerestante",
+      "reference": "ops$ml.aget_dureerestante(a.id_affaire)",
+      "type_relation": "calculée",
+      "filtrable": true
+    },
+    "ENCOURS_TOTAL": {
+      "description": "Somme des encours à la date de référence",
+      "alias_sql": "encours_total",
+      "reference": "SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "calculée",
+      "filtrable": true
+    },
+    "RATIO_ENCOURS": {
+      "description": "Part de chaque durée restante dans l'encours global",
+      "alias_sql": "ratio_encours",
+      "reference": "RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER()",
+      "type_relation": "calculée",
+      "filtrable": true
+    },
+    "DUREE_PONDEREE_ENCOURS": {
+      "description": "Durée pondérée de remboursement en fonction du ratio d'encours",
+      "alias_sql": "duree_ponderee_encours",
+      "reference": "ops$ml.aget_dureerestante(a.id_affaire) * RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER()",
+      "type_relation": "calculée",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de calcul de l'encours (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quelle est la durée restante moyenne de remboursement ?",
+    "Montre-moi la répartition des encours par durée restante",
+    "Quelle part de l'encours correspond à chaque durée restante ?"
+  ],
+  "filtres_possibles": [
+    "DUREE_RESTANTE",
+    "ENCOURS_TOTAL",
+    "RATIO_ENCOURS",
+    "DUREE_PONDEREE_ENCOURS"
+  ],
+  "requete_sql": "SELECT ops$ml.aget_dureerestante(a.id_affaire) AS dureerestante, SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) AS encours_total, RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER() AS ratio_encours, ops$ml.aget_dureerestante(a.id_affaire) * RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER() AS duree_ponderee_encours FROM affaire a WHERE a.code_statut_impose IN ('AMEL', 'AFIN') GROUP BY ops$ml.aget_dureerestante(a.id_affaire) HAVING ops$ml.aget_dureerestante(a.id_affaire) > 0 ORDER BY 1"
+}
+,
+{
+  "id": 7,
+  "titre": "Part du premier loyer dans les MEF",
+  "description": "Calcule la répartition de la part du premier loyer dans le capital total des contrats actifs et déduit une moyenne pondérée pour le portefeuille.",
+  "categorie": "Affaires / Finance",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux (contrats, projets, affaires clients)",
+    "TABECH": "Échéancier des loyers pour chaque affaire"
+  },
+  "colonnes": {
+    "PART_1_LOYER": {
+      "description": "Proportion du premier loyer par rapport au capital total du contrat",
+      "alias_sql": "part1loyer",
+      "reference": "ROUND((crb + interet) / (crd + crb), 2)",
+      "type_relation": "calculée",
+      "filtrable": true
+    },
+    "CAPITAL_TOTAL": {
+      "description": "Somme du capital restant dû + capital remboursé",
+      "alias_sql": "capital_total",
+      "reference": "SUM(crd + crb)",
+      "type_relation": "calculée",
+      "filtrable": true
+    },
+    "RATIO_CAPITAL": {
+      "description": "Part de chaque part1loyer dans le capital total",
+      "alias_sql": "ratio_capital",
+      "reference": "RATIO_TO_REPORT(SUM(crd + crb)) OVER()",
+      "type_relation": "calculée",
+      "filtrable": true
+    },
+    "PART_1_LOYER_PONDEREE": {
+      "description": "Part du premier loyer pondérée par le ratio capital",
+      "alias_sql": "part1loyer_ponderee",
+      "reference": "(ROUND((crb + interet) / (crd + crb), 2)) * RATIO_TO_REPORT(SUM(crd + crb)) OVER()",
+      "type_relation": "calculée",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de calcul des encours (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quelle est la part du premier loyer dans les contrats ?",
+    "Montre-moi la répartition de la part du 1er loyer",
+    "Quelle est la moyenne pondérée de la part du 1er loyer pour le portefeuille ?"
+  ],
+  "filtres_possibles": [
+    "PART_1_LOYER",
+    "CAPITAL_TOTAL",
+    "RATIO_CAPITAL",
+    "PART_1_LOYER_PONDEREE"
+  ],
+  "requete_sql": "SELECT ROUND((crb + interet) / (crd + crb), 2) AS part1loyer, SUM(crd + crb) AS capital_total, RATIO_TO_REPORT(SUM(crd + crb)) OVER() AS ratio_capital, (ROUND((crb + interet) / (crd + crb), 2)) * RATIO_TO_REPORT(SUM(crd + crb)) OVER() AS part1loyer_ponderee FROM affaire a, tabech e WHERE a.code_statut_impose IN ('AMEL', 'AFIN') AND a.id_affaire = e.id_affaire AND e.code_statut = 'EXPL' AND e.no_echeance = 1 AND (e.crd + e.crb) <> 0 GROUP BY ROUND((crb + interet) / (crd + crb), 2) ORDER BY 1"
+}
+,
+
+{
+  "id": 8,
+  "titre": "Situation des contrats",
+  "description": "État détaillé de chaque contrat actif (montant initial, taux, premier loyer, durée, encours, impayés, restant dû) regroupé par client et groupe de clients.",
+  "categorie": "Affaires / Finance",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux (contrats, projets, affaires clients)",
+    "TIERS": "Informations sur les clients"
+  },
+  "colonnes": {
+    "GROUPE_CLIENT": {
+      "description": "Groupe du client",
+      "alias_sql": "tetegroupe",
+      "reference": "ops$ml.tget_groupe(a.tiers_client)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "TIERS_CLIENT": {
+      "description": "Code du client",
+      "alias_sql": "tiers_client",
+      "reference": "a.tiers_client",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant de l’affaire",
+      "alias_sql": "ie_affaire",
+      "reference": "a.ie_affaire",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "LIBELLE": {
+      "description": "Libellé de l’affaire",
+      "alias_sql": "libelle",
+      "reference": "a.libelle",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "CODE_STATUT": {
+      "description": "Statut du contrat",
+      "alias_sql": "code_statut",
+      "reference": "a.code_statut",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "MT_HT": {
+      "description": "Montant initial du financement",
+      "alias_sql": "mt_ht",
+      "reference": "ops$ml.aget_financementinitial(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "DTMEL": {
+      "description": "Date de mise à jour / date de référence",
+      "alias_sql": "dtmel",
+      "reference": "to_date(a.date_mel, 'j')",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "TAUX": {
+      "description": "Taux appliqué au financement",
+      "alias_sql": "taux",
+      "reference": "ops$ml.aget_taux(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "TEG": {
+      "description": "Taux effectif global",
+      "alias_sql": "teg",
+      "reference": "ops$ml.aget_teg(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "PREMIER_LOYER": {
+      "description": "Montant du premier loyer",
+      "alias_sql": "premierloyer",
+      "reference": "ops$ml.aget_premierloyer2(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "LOYER": {
+      "description": "Loyer TTC",
+      "alias_sql": "loyer",
+      "reference": "ops$ml.aget_loyerttc2(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "DUREE": {
+      "description": "Durée du contrat",
+      "alias_sql": "duree",
+      "reference": "ops$ml.aget_duree2(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MT_REGLES": {
+      "description": "Montant déjà réglé",
+      "alias_sql": "mtregles",
+      "reference": "ops$ml.aget_reglement(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MT_LOYER_RESTANT": {
+      "description": "Montant restant à payer",
+      "alias_sql": "mtloyerrestant",
+      "reference": "ops$ml.aget_restantdu(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "DUREE_RESTANTE": {
+      "description": "Durée restante de remboursement",
+      "alias_sql": "dureerest",
+      "reference": "ops$ml.aget_dureerestante(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "ENCOURS": {
+      "description": "Encours total du contrat",
+      "alias_sql": "Encours",
+      "reference": "ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "IMPAYES": {
+      "description": "Montant impayé",
+      "alias_sql": "Impayes",
+      "reference": "ops$ml.aget_soldecmtb(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de calcul des encours (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi la situation de mes contrats actifs",
+    "Quels sont les impayés par client et par groupe ?",
+    "Donne-moi les encours et le restant dû pour chaque affaire"
+  ],
+  "filtres_possibles": [
+    "GROUPE_CLIENT",
+    "TIERS_CLIENT",
+    "CODE_STATUT",
+    "MT_HT",
+    "DUREE_RESTANTE",
+    "ENCOURS",
+    "IMPAYES"
+  ],
+  "requete_sql": "SELECT ops$ml.tget_groupe(a.tiers_client) AS tetegroupe, a.tiers_client, a.ie_affaire, a.libelle, a.code_statut, ops$ml.aget_financementinitial(a.id_affaire) AS mt_ht, to_date(a.date_mel, 'j') AS dtmel, ops$ml.aget_taux(a.id_affaire) AS taux, ops$ml.aget_teg(a.id_affaire) AS teg, ops$ml.aget_premierloyer2(a.id_affaire) AS premierloyer, ops$ml.aget_loyerttc2(a.id_affaire) AS loyer, ops$ml.aget_duree2(a.id_affaire) AS duree, ops$ml.aget_reglement(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS mtregles, ops$ml.aget_restantdu(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS mtloyerrestant, ops$ml.aget_dureerestante(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS dureerest, ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS Encours, ops$ml.aget_soldecmtb(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS Impayes FROM affaire a, tiers t WHERE a.code_statut NOT IN ('A090', 'A900', 'A950') AND a.tiers_client = t.tiers ORDER BY tetegroupe, a.tiers_client, a.ie_affaire"
+}
+,
+
+{
+  "id": 9,
+  "titre": "État des affaires par type de bien",
+  "description": "Liste des contrats actifs ou finalisés, affichant pour chaque affaire son client, identifiant, statut, date, type de bien financé, montant HT et libellé du bien, triée par catégorie de bien.",
+  "categorie": "Affaires / Bien",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux (contrats, projets, affaires clients)"
+  },
+  "colonnes": {
+    "TIERS_CLIENT": {
+      "description": "Code du client",
+      "alias_sql": "tiers_client",
+      "reference": "a.tiers_client",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant de l’affaire",
+      "alias_sql": "ie_affaire",
+      "reference": "a.ie_affaire",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "LIBELLE": {
+      "description": "Libellé de l’affaire",
+      "alias_sql": "libelle",
+      "reference": "a.libelle",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "CODE_STATUT": {
+      "description": "Statut du contrat",
+      "alias_sql": "code_statut",
+      "reference": "a.code_statut",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "DTMEL": {
+      "description": "Date de mise à jour / date de référence",
+      "alias_sql": "dtmel",
+      "reference": "to_date(a.date_mel, 'j')",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "TYPE_BIEN": {
+      "description": "Type de bien financé",
+      "alias_sql": "typebien",
+      "reference": "ops$ml.aget_bien_typegroupe(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MT_HT": {
+      "description": "Montant du financement HT",
+      "alias_sql": "mt_ht",
+      "reference": "ops$ml.aget_financement(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "OBJET": {
+      "description": "Libellé du bien",
+      "alias_sql": "objet",
+      "reference": "ops$ml.aget_bien_libelle(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de référence pour le calcul (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les affaires selon le type de bien",
+    "Quels biens sont financés pour chaque client ?",
+    "Liste des contrats actifs avec leur type de bien"
+  ],
+  "filtres_possibles": [
+    "TYPE_BIEN",
+    "CODE_STATUT",
+    "TIERS_CLIENT",
+    "MT_HT"
+  ],
+  "requete_sql": "SELECT a.tiers_client, a.ie_affaire, a.libelle, a.code_statut, to_date(a.date_mel, 'j') AS dtmel, ops$ml.aget_bien_typegroupe(a.id_affaire) AS typebien, ops$ml.aget_financement(a.id_affaire) AS mt_ht, ops$ml.aget_bien_libelle(a.id_affaire) AS objet FROM affaire a WHERE a.code_statut_impose IN ('AMEL', 'AFIN') ORDER BY typebien, a.ie_affaire"
+}
+,
+{
+  "id": 10,
+  "titre": "État des affaires par agence bancaire",
+  "description": "Liste pour chaque client particulier de ses affaires actives/finalisées, associant le type de bien, l’agence bancaire, le montant financé, l’encours, les impayés et le loyer, trié par agence puis client.",
+  "categorie": "Affaires / Banque",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux (contrats, projets, affaires clients)",
+    "RIB": "Informations bancaires du client",
+    "AFFTIERS": "Relation entre affaire et tiers"
+  },
+  "colonnes": {
+    "TIERS_CLIENT": {
+      "description": "Code du client",
+      "alias_sql": "tiers_client",
+      "reference": "a.tiers_client",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant de l’affaire",
+      "alias_sql": "ie_affaire",
+      "reference": "a.ie_affaire",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "LIBELLE": {
+      "description": "Libellé de l’affaire",
+      "alias_sql": "libelle",
+      "reference": "a.libelle",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "CATEGORIE": {
+      "description": "Type de bien financé",
+      "alias_sql": "categorie",
+      "reference": "ops$ml.aget_bien_typegroupe(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "AGENCE": {
+      "description": "Agence bancaire du client (banque-guichet-domiciliation)",
+      "alias_sql": "agence",
+      "reference": "rib.banque || '-' || rib.guichet || ' ' || NVL(rib.domiciliation, '')",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "DTMEL": {
+      "description": "Date de mise à jour / date de référence",
+      "alias_sql": "dtmel",
+      "reference": "to_date(a.date_mel, 'j')",
+      "type_relation": "table",
+      "filtrable": true
+    },
+    "MTFIN": {
+      "description": "Montant financé HT",
+      "alias_sql": "mtfin",
+      "reference": "ekr_mnt_aff_ht(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "ENCOURS": {
+      "description": "Encours restant",
+      "alias_sql": "Encours",
+      "reference": "ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "IMPAYES": {
+      "description": "Montant impayé",
+      "alias_sql": "Impayes",
+      "reference": "ops$ml.aget_soldecmtb(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "LOYER": {
+      "description": "Loyer TTC",
+      "alias_sql": "loyer",
+      "reference": "ops$ml.aget_loyerttc2(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de référence pour le calcul (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les affaires par agence bancaire",
+    "Quels clients ont des affaires dans telle agence ?",
+    "Donne la liste des contrats par agence et type de bien"
+  ],
+  "filtres_possibles": [
+    "AGENCE",
+    "CATEGORIE",
+    "CODE_STATUT",
+    "TIERS_CLIENT"
+  ],
+  "requete_sql": "SELECT a.tiers_client, a.ie_affaire, a.libelle, ops$ml.aget_bien_typegroupe(a.id_affaire) AS categorie, rib.banque || '-' || rib.guichet || ' ' || NVL(rib.domiciliation, '') AS agence, to_date(a.date_mel, 'j') AS dtmel, ekr_mnt_aff_ht(a.id_affaire) AS mtfin, ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS Encours, ops$ml.aget_soldecmtb(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS Impayes, ops$ml.aget_loyerttc2(a.id_affaire) AS loyer FROM affaire a, rib, afftiers at WHERE a.tiers_client = rib.tiers AND a.code_statut_impose IN ('AMEL', 'AFIN') AND at.id_affaire = a.id_affaire AND at.tiers_1 = rib.tiers AND at.code_nat_tiers = 'PCLI' AND at.no_rib = rib.no_rib ORDER BY 5, a.tiers_client, a.ie_affaire"
+}
+,
+{
+  "id": 11,
+  "titre": "État des affaires par apporteur",
+  "description": "Vision consolidée des affaires par apporteur, montrant pour chacun les montants approuvés, commandés et engagés, ainsi que solde et impayés, utile pour le suivi commercial et le pilotage des apporteurs.",
+  "categorie": "Affaires / Commercial",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux (contrats, projets, affaires clients)",
+    "DETARRLOY": "Détails des arrhes ou loyers sur les affaires"
+  },
+  "colonnes": {
+    "APPORTEUR": {
+      "description": "Nom ou code de l’apporteur",
+      "alias_sql": "apporteur",
+      "reference": "ops$ml.aget_apporteur(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MTMEF": {
+      "description": "Montant engagé sur les affaires (MEF)",
+      "alias_sql": "mtmef",
+      "reference": "(CASE WHEN a.code_statut NOT IN ('A000','A015','A020','A025','A090','A900','A950') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MTAPPROUVE": {
+      "description": "Montant approuvé pour les affaires",
+      "alias_sql": "mtapprouve",
+      "reference": "SUM(CASE WHEN a.code_statut = 'A020' THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MTCOMMANDE": {
+      "description": "Montant commandé pour les affaires",
+      "alias_sql": "mtcommande",
+      "reference": "SUM(CASE WHEN a.code_statut = 'A025' THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "SOLDE": {
+      "description": "Solde restant à payer",
+      "alias_sql": "solde",
+      "reference": "ops$ml.aget_soldecmtb(a.id_affaire, to_date('31/07/2025','dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "NBLOYER": {
+      "description": "Nombre de loyers impayés",
+      "alias_sql": "nbloyer",
+      "reference": "ops$ml.aget_nbloyerimpaye(a.id_affaire, to_date('31/07/2025','dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de référence pour calcul des soldes et impayés (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les affaires par apporteur",
+    "Quels apporteurs ont les montants engagés les plus élevés ?",
+    "Donne le solde et impayés par apporteur"
+  ],
+  "filtres_possibles": [
+    "APPORTEUR",
+    "CODE_STATUT",
+    "MTAPPROUVE > X",
+    "MTCOMMANDE > X"
+  ],
+  "requete_sql": "SELECT s.apporteur, SUM(m.mtmef) AS mtmef, s.mtapprouve, s.mtcommande, RATIO_TO_REPORT(SUM(m.mtmef)) OVER(), SUM(m.solde) AS solde, SUM(m.nbloyer) AS nbloyer FROM (SELECT ops$ml.aget_apporteur(a2.id_affaire) AS apporteur, SUM(CASE WHEN a2.code_statut = 'A020' THEN ops$ml.aget_financement(a2.id_affaire) ELSE 0 END) AS mtapprouve, SUM(CASE WHEN a2.code_statut = 'A025' THEN ops$ml.aget_financement(a2.id_affaire) ELSE 0 END) AS mtcommande FROM affaire a2 GROUP BY ops$ml.aget_apporteur(a2.id_affaire)) s, (SELECT a.date_mel, ops$ml.aget_apporteur(a.id_affaire) AS apporteur, (CASE WHEN a.code_statut NOT IN ('A000', 'A015', 'A020', 'A025', 'A090', 'A900', 'A950') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END) AS mtmef, ops$ml.aget_soldecmtb(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS solde, ops$ml.aget_nbloyerimpaye(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS nbloyer FROM affaire a WHERE a.code_statut_impose IN ('AMEL', 'AFIN') AND a.id_affaire IN (SELECT d.id_affaire FROM detarrloy d WHERE d.code_type_dossier = 'MELO')) m WHERE s.apporteur = m.apporteur (+) AND s.apporteur <> 'NON INDIQUE' GROUP BY s.apporteur, s.mtapprouve, s.mtcommande HAVING (NVL(SUM(m.mtmef), 0) <> 0 OR s.mtapprouve <> 0 OR s.mtcommande <> 0) ORDER BY 1"
+}
+,
+{
+  "id": 12,
+  "titre": "État des règlements",
+  "description": "Liste tous les règlements valides, indiquant pour chaque mouvement le tiers payeur, l’émetteur, le bordereau et l’identifiant du règlement, la référence, la date d’échéance, le montant réel et l’état de l’imputation, en excluant les règlements annulés ou invalidés.",
+  "categorie": "Finance / Comptabilité",
+  "tables": {
+    "REG": "Table des règlements enregistrés",
+    "ACODIFS": "Table des codes et types de réglements",
+    "LOTREG": "Table des lots de règlements pour vérification de l'état"
+  },
+  "colonnes": {
+    "TIERS": {
+      "description": "Tiers payeur ou tiers imputé",
+      "alias_sql": "tiers",
+      "reference": "NVL(reg.tiers_reglement, reg.tiers_impute)",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "LIBELLE_EMETTEUR": {
+      "description": "Nom ou description de l’émetteur",
+      "alias_sql": "libelle_emetteur",
+      "reference": "reg.libelle_emetteur",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "ID_REG": {
+      "description": "Identifiant du règlement",
+      "alias_sql": "id_reg",
+      "reference": "reg.id_reg",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "ID_BORD": {
+      "description": "Identifiant du bordereau associé",
+      "alias_sql": "id_bord",
+      "reference": "reg.id_bord",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "CODE": {
+      "description": "Code type de règlement",
+      "alias_sql": "code",
+      "reference": "m.code",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "REFERENCE": {
+      "description": "Référence du chèque ou externe",
+      "alias_sql": "reference",
+      "reference": "CASE WHEN reg.code_reglement IN (1, 4, 11) THEN reg.no_cheque ELSE reg.reference_externe END",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "DATE_ECHEANCE": {
+      "description": "Date d’échéance du règlement",
+      "alias_sql": "date_echeance",
+      "reference": "to_date(reg.date_echeance,'J')",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "MONTANT": {
+      "description": "Montant réel du règlement, ajusté selon sens ou décaissement",
+      "alias_sql": "montant",
+      "reference": "CASE WHEN reg.code_operation = 'DECA' THEN -1 ELSE 1 END * reg.code_sens_ni * reg.montant_reglement",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "CODE_ETAT_IMPUTATION": {
+      "description": "État de l’imputation du règlement",
+      "alias_sql": "code_etat_imputation",
+      "reference": "reg.code_etat_imputation",
+      "type_relation": "colonne",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de référence pour filtrer les montants ou échéances (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi tous les règlements valides",
+    "Quels règlements ont été imputés et quels sont encore ouverts ?",
+    "Liste les montants réglés par tiers ou émetteur"
+  ],
+  "filtres_possibles": [
+    "TIERS",
+    "LIBELLE_EMETTEUR",
+    "DATE_ECHEANCE",
+    "CODE_ETAT_IMPUTATION",
+    "MONTANT > X"
+  ],
+  "requete_sql": "SELECT NVL(reg.tiers_reglement, reg.tiers_impute) AS tiers, reg.libelle_emetteur, reg.id_reg, reg.id_bord, m.code, CASE WHEN reg.code_reglement IN (1, 4, 11) THEN reg.no_cheque ELSE reg.reference_externe END AS reference, to_date(reg.date_echeance,'J') AS date_echeance, CASE WHEN reg.code_operation = 'DECA' THEN -1 ELSE 1 END * reg.code_sens_ni * reg.montant_reglement AS montant, reg.code_etat_imputation FROM reg, acodifs m WHERE reg.code_reglement = m.cod_interne AND m.typ_code = 'REGL' AND m.code_statut = 2 AND NOT EXISTS (SELECT 1 FROM lotreg l WHERE l.id_lotreg = reg.id_lotreg AND l.code_statut = 4) ORDER BY 1, 7, 3"
+}
+,
+
+{
+  "id": 13,
+  "titre": "État de retour des impayés",
+  "description": "Fournit un état mensuel des règlements encaissés avec détail des montants, rejets et règlements effectifs, ainsi que des taux de rejet et de règlement, pour suivre les impayés et analyser les performances d’encaissement.",
+  "categorie": "Finance / Impayés",
+  "tables": {
+    "REG": "Table des règlements enregistrés",
+    "AFFAIRE": "Dossiers commerciaux liés aux règlements",
+    "BORD": "Table des bordereaux associés aux règlements"
+  },
+  "colonnes": {
+    "DATE_ECHEANCE": {
+      "description": "Date d’échéance formatée par mois (YYYY/MM)",
+      "alias_sql": "dtecheance",
+      "reference": "to_char(to_date(reg.date_echeance,'J'), 'yyyy/mm')",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "NBCA": {
+      "description": "Nombre total de règlements encaissés",
+      "alias_sql": "nbca",
+      "reference": "COUNT(reg.id_reg)",
+      "type_relation": "fonction_agregat",
+      "filtrable": true
+    },
+    "MTCA": {
+      "description": "Montant total encaissé",
+      "alias_sql": "mtca",
+      "reference": "SUM(reg.montant_reglement)",
+      "type_relation": "fonction_agregat",
+      "filtrable": true
+    },
+    "NBREJET": {
+      "description": "Nombre de règlements rejetés",
+      "alias_sql": "nbrejet",
+      "reference": "SUM(CASE WHEN reg.id_rejet IS NULL THEN 0 ELSE 1 END)",
+      "type_relation": "fonction_agregat",
+      "filtrable": true
+    },
+    "MTREJET": {
+      "description": "Montant des règlements rejetés",
+      "alias_sql": "mtrejet",
+      "reference": "SUM(CASE WHEN reg.id_rejet IS NULL THEN 0 ELSE reg.montant_reglement END)",
+      "type_relation": "fonction_agregat",
+      "filtrable": true
+    },
+    "TAUXREJET": {
+      "description": "Proportion de montants rejetés",
+      "alias_sql": "tauxrejet",
+      "reference": "SUM(CASE WHEN reg.id_rejet IS NULL THEN NULL ELSE reg.montant_reglement END) / SUM(reg.montant_reglement)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "RATIO": {
+      "description": "Ratio pondéré des montants rejetés",
+      "alias_sql": "ratio",
+      "reference": "(SUM(CASE WHEN reg.id_rejet IS NULL THEN NULL ELSE reg.montant_reglement END) / SUM(reg.montant_reglement)) * RATIO_TO_REPORT(SUM(reg.montant_reglement)) OVER ()",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "REGLEMENT": {
+      "description": "Montant réellement réglé après déduction des factures impayées",
+      "alias_sql": "reglement",
+      "reference": "SUM(reg.montant_reglement) - SUM(ops$ml.get_soldefacturefromidreg(reg.id_reg))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "TAUXREG": {
+      "description": "Proportion de règlements effectifs par rapport au total",
+      "alias_sql": "tauxreg",
+      "reference": "(SUM(reg.montant_reglement) - SUM(ops$ml.get_soldefacturefromidreg(reg.id_reg))) / SUM(reg.montant_reglement)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "RATIOREG": {
+      "description": "Ratio pondéré des règlements effectifs",
+      "alias_sql": "ratioreg",
+      "reference": "((SUM(reg.montant_reglement) - SUM(ops$ml.get_soldefacturefromidreg(reg.id_reg))) / SUM(reg.montant_reglement)) * RATIO_TO_REPORT(SUM(reg.montant_reglement)) OVER ()",
+      "type_relation": "fonction",
+      "filtrable": false
+    }
+  },
+  "parametres": {
+    "date_debut": {
+      "description": "Date de début pour filtrer les règlements (JJ/MM/AAAA)",
+      "obligatoire": true
+    },
+    "date_fin": {
+      "description": "Date de fin pour filtrer les règlements (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi le retour des impayés par mois",
+    "Quels sont les taux de rejet pour les règlements du mois dernier ?",
+    "Combien a été effectivement encaissé par rapport aux montants prévus ?"
+  ],
+  "filtres_possibles": [
+    "DATE_ECHEANCE",
+    "NBCA > X",
+    "MTCA > X",
+    "TAUXREJET > Y",
+    "TAUXREG > Z"
+  ],
+  "requete_sql": "SELECT to_char(to_date(reg.date_echeance,'J'), 'yyyy/mm') AS dtecheance, COUNT(reg.id_reg) AS nbca, SUM(reg.montant_reglement) AS mtca, SUM(CASE WHEN reg.id_rejet IS NULL THEN 0 ELSE 1 END) AS nbrejet, SUM(CASE WHEN reg.id_rejet IS NULL THEN 0 ELSE reg.montant_reglement END) AS mtrejet, SUM(CASE WHEN reg.id_rejet IS NULL THEN NULL ELSE reg.montant_reglement END) / SUM(reg.montant_reglement) AS tauxrejet, (SUM(CASE WHEN reg.id_rejet IS NULL THEN NULL ELSE reg.montant_reglement END) / SUM(reg.montant_reglement)) * RATIO_TO_REPORT(SUM(reg.montant_reglement)) OVER () AS ratio, SUM(reg.montant_reglement) - SUM(ops$ml.get_soldefacturefromidreg(reg.id_reg)) AS reglement, (SUM(reg.montant_reglement) - SUM(ops$ml.get_soldefacturefromidreg(reg.id_reg))) / SUM(reg.montant_reglement) AS tauxreg, ((SUM(reg.montant_reglement) - SUM(ops$ml.get_soldefacturefromidreg(reg.id_reg))) / SUM(reg.montant_reglement)) * RATIO_TO_REPORT(SUM(reg.montant_reglement)) OVER () AS ratioreg FROM reg, affaire a WHERE reg.code_etat_support = 'SUVA' AND reg.code_etat_imputation = 'VALG' AND reg.code_operation = 'ENCA' AND reg.id_reg_rejete IS NULL AND reg.id_bord IN (SELECT b.id_bord FROM bord b WHERE b.code_operation = 'ENCA' AND b.code_sens_ni = 1 AND (b.code_reglement = 2 OR b.code_reglement = 4) AND (reg.code_reglement = 2 OR reg.code_reglement = 4) AND b.code_etat_bordereau = 'REBA' AND b.date_echeance >= to_char(to_date('01/08/2002', 'dd/mm/yyyy'), 'j')) AND a.id_affaire = reg.id_affaire GROUP BY to_char(to_date(reg.date_echeance,'J'), 'yyyy/mm') HAVING SUM(reg.montant_reglement) > 0 ORDER BY 1"
+}
+,
+{
+  "id": 14,
+  "titre": "État des impayés par client",
+  "description": "Fournit un état détaillé des impayés par client, incluant encours total, loyers impayés, montants non imputés, frais contentieux et intérêts de retard, et permet de classer les clients par risque ou scoring à une date précise.",
+  "categorie": "Finance / Impayés",
+  "tables": {
+    "TIERS": "Informations sur les clients",
+    "AFFAIRE": "Dossiers commerciaux liés aux clients"
+  },
+  "colonnes": {
+    "TIERS": {
+      "description": "Code client unique",
+      "alias_sql": "tiers",
+      "reference": "t.tiers",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "NOMAFF_TIERS": {
+      "description": "Nom ou raison sociale du client",
+      "alias_sql": "nomaff_tiers",
+      "reference": "t.nomaff_tiers",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "CLASSE": {
+      "description": "Classe de risque/scoring du client",
+      "alias_sql": "classe",
+      "reference": "ops$ml.tget_classex(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "ENCOURS": {
+      "description": "Encours total du client",
+      "alias_sql": "encours",
+      "reference": "ops$ml.tget_encours(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "IMPAYESLOYER": {
+      "description": "Loyers impayés",
+      "alias_sql": "ImpayesLoyer",
+      "reference": "ops$ml.tget_soldeloyer(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "NONIMPUTE": {
+      "description": "Montants non imputés",
+      "alias_sql": "NonImpute",
+      "reference": "ops$ml.tget_nonimpute(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "FRAIS": {
+      "description": "Frais contentieux (avocat, procédures)",
+      "alias_sql": "frais",
+      "reference": "ops$ml.tget_fraisavocat(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "IR": {
+      "description": "Intérêts de retard",
+      "alias_sql": "IR",
+      "reference": "ops$ml.tget_fraisretard(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date pour calculer les encours et impayés (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les clients avec le plus d'impayés",
+    "Quels sont les encours impayés à fin juillet 2025 ?",
+    "Classe les clients selon leur risque d'impayés"
+  ],
+  "filtres_possibles": [
+    "CLASSE",
+    "ENCOURS > X",
+    "IMPAYESLOYER > Y",
+    "FRAIS > Z",
+    "IR > W"
+  ],
+  "requete_sql": "SELECT NULL, t.tiers, t.nomaff_tiers, ops$ml.tget_classex(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) AS classe, ops$ml.tget_encours(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) AS encours, ops$ml.tget_soldeloyer(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) AS ImpayesLoyer, ops$ml.tget_nonimpute(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) AS NonImpute, ops$ml.tget_fraisavocat(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) AS frais, ops$ml.tget_fraisretard(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) AS IR FROM tiers t WHERE t.tiers IN (SELECT DISTINCT tiers_client FROM affaire) ORDER BY 1, 2"
+}
+,
+{
+  "id": 15,
+  "titre": "État des impayés par client 2",
+  "description": "Permet de mesurer et suivre le risque client en termes d’impayés, nombre de mois impayés, soldes restants, arrangements éventuels et localisation du client, pour une date précise.",
+  "categorie": "Finance / Impayés",
+  "tables": {
+    "TIERS": "Informations sur les clients",
+    "AFFAIRE": "Dossiers commerciaux liés aux clients"
+  },
+  "colonnes": {
+    "TIERS": {
+      "description": "Code client unique",
+      "alias_sql": "tiers",
+      "reference": "t.tiers",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "NOMAFF_TIERS": {
+      "description": "Nom ou raison sociale du client",
+      "alias_sql": "nomaff_tiers",
+      "reference": "t.nomaff_tiers",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "CLASSE": {
+      "description": "Classe de risque/scoring du client",
+      "alias_sql": "classe",
+      "reference": "ops$ml.tget_classex(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "NBMOISIMPAYES": {
+      "description": "Nombre de mois impayés",
+      "alias_sql": "NbMoisImpayes",
+      "reference": "ops$ml.TGet_NbMoisImpaye(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "ENCOURS": {
+      "description": "Encours total du client",
+      "alias_sql": "encours",
+      "reference": "ops$ml.tget_encours(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "SOLDEROYER": {
+      "description": "Montant des loyers impayés",
+      "alias_sql": "soldeloyer",
+      "reference": "ops$ml.tget_soldeloyer(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "RISQUE": {
+      "description": "Encours + soldes impayés",
+      "alias_sql": "Risque",
+      "reference": "ops$ml.tget_encours(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) + ops$ml.tget_soldeloyer(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "calcul",
+      "filtrable": true
+    },
+    "SOLDEROYERM3": {
+      "description": "Solde des loyers impayés à 3 mois avant la date",
+      "alias_sql": "soldeloyerM3",
+      "reference": "ops$ml.tget_soldeloyer2(t.tiers, TRUNC(add_months(to_date('31/07/2025', 'dd/mm/yyyy'), -2), 'month') - 1)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "ARRANGEMENT": {
+      "description": "Arrangement éventuel avec le client",
+      "alias_sql": "Arrangement",
+      "reference": "ops$ml.tget_arrangement(t.tiers)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "NONIMPUTE": {
+      "description": "Montants non imputés",
+      "alias_sql": "NonImpute",
+      "reference": "ops$ml.tget_nonimpute(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "VILLE": {
+      "description": "Ville du client",
+      "alias_sql": "ville",
+      "reference": "ops$ml.tget_ville(t.tiers)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "RECOUVREUR": {
+      "description": "Nom du recouvreur assigné au client",
+      "alias_sql": "recouvreur",
+      "reference": "ops$ml.tget_recouvreur(t.tiers)",
+      "type_relation": "fonction",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date pour calculer les impayés et le risque (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quels clients ont des impayés sur plusieurs mois ?",
+    "Montre-moi les clients à risque élevé à fin juillet 2025",
+    "Quels clients ont un arrangement en cours ?"
+  ],
+  "filtres_possibles": [
+    "CLASSE",
+    "RISQUE > X",
+    "NBMOISIMPAYES > Y",
+    "VILLE = '...' ",
+    "ARRANGEMENT = 'OUI/NON'"
+  ],
+  "requete_sql": "SELECT t.tiers, t.nomaff_tiers, ops$ml.tget_classex(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) AS classe, ops$ml.TGet_NbMoisImpaye(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) AS NbMoisImpayes, ops$ml.tget_encours(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) AS encours, ops$ml.tget_soldeloyer(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) AS soldeloyer, ops$ml.tget_encours(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) + ops$ml.tget_soldeloyer(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) AS Risque, ops$ml.tget_soldeloyer2(t.tiers, TRUNC(add_months(to_date('31/07/2025', 'dd/mm/yyyy'), -2), 'month') - 1) AS soldeloyerM3, ops$ml.tget_arrangement(t.tiers) AS Arrangement, ops$ml.tget_nonimpute(t.tiers, to_date('31/07/2025', 'dd/mm/yyyy')) AS NonImpute, ops$ml.tget_ville(t.tiers) AS ville, ops$ml.tget_recouvreur(t.tiers) AS recouvreur FROM tiers t WHERE t.tiers IN (SELECT DISTINCT tiers_client FROM affaire) ORDER BY 1"
+}
+,
+{
+  "id": 16,
+  "titre": "État des impayés et intérêts de retard",
+  "description": "Permet de suivre les impayés et intérêts de retard ligne par ligne pour chaque client, avec les informations de contact, le détail des montants et le total à recouvrer.",
+  "categorie": "Finance / Impayés",
+  "tables": {
+    "TIERS": "Informations sur les clients",
+    "AFFAIRE": "Dossiers commerciaux liés aux clients",
+    "IDENT_GESTION": "Identifiants de gestion pour suivre les échéances et impayés"
+  },
+  "colonnes": {
+    "TIERS": {
+      "description": "Code client unique",
+      "alias_sql": "tiers",
+      "reference": "t.tiers",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "NOMAFF_TIERS": {
+      "description": "Nom ou raison sociale du client",
+      "alias_sql": "nom",
+      "reference": "t.nomaff_tiers",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "RESPONSABLE": {
+      "description": "Dirigeant ou responsable du client",
+      "alias_sql": "responsable",
+      "reference": "ops$ml.tget_dirigeant(t.tiers)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant de l’affaire",
+      "alias_sql": "ie_affaire",
+      "reference": "a.ie_affaire",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "ECHEANCE": {
+      "description": "Date de l’échéance",
+      "alias_sql": "echeance",
+      "reference": "TO_DATE(i.date_operation, 'J')",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "SOLDEROYER": {
+      "description": "Montant du loyer impayé",
+      "alias_sql": "soldeloyer",
+      "reference": "ops$ml.iget_soldeloyer(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "INTERET": {
+      "description": "Montant des intérêts de retard",
+      "alias_sql": "interet",
+      "reference": "ops$ml.iget_fraisretard(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "PRESTATIONS": {
+      "description": "Montant des prestations liées à l’affaire",
+      "alias_sql": "prestations",
+      "reference": "ops$ml.iget_prestations(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "TELEPHONE": {
+      "description": "Numéro de téléphone du client",
+      "alias_sql": "telephone",
+      "reference": "ops$ml.tget_telephone(t.tiers)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "ADRESSE": {
+      "description": "Adresse du client",
+      "alias_sql": "adresse",
+      "reference": "ops$ml.tget_adresse(t.tiers)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "TOTAL": {
+      "description": "Total à recouvrer (loyer + intérêts + prestations)",
+      "alias_sql": "total",
+      "reference": "ops$ml.iget_soldeloyer(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy')) + ops$ml.iget_fraisretard(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy')) + ops$ml.iget_prestations(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "calcul",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date pour calculer les soldes et intérêts (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les impayés détaillés pour chaque client",
+    "Quels sont les intérêts de retard par affaire à fin juillet 2025 ?",
+    "Liste des clients avec montants totaux à recouvrer"
+  ],
+  "filtres_possibles": [
+    "TIERS",
+    "RESPONSABLE",
+    "IE_AFFAIRE",
+    "ECHEANCE >= ...",
+    "TOTAL > X"
+  ],
+  "requete_sql": "SELECT t.tiers, t.nomaff_tiers AS nom, ops$ml.tget_dirigeant(t.tiers) AS responsable, a.ie_affaire, TO_DATE(i.date_operation, 'J') AS echeance, ops$ml.iget_soldeloyer(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy')) AS soldeloyer, ops$ml.iget_fraisretard(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy')) AS interet, ops$ml.iget_prestations(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy')) AS prestations, ops$ml.tget_telephone(t.tiers) AS telephone, ops$ml.tget_adresse(t.tiers) AS adresse, ops$ml.iget_soldeloyer(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy')) + ops$ml.iget_fraisretard(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy')) + ops$ml.iget_prestations(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy')) AS total FROM tiers t, affaire a, ident_gestion i WHERE a.tiers_client = t.tiers AND a.id_affaire = i.id_affaire AND t.tiers = i.tiers AND (ops$ml.iget_soldeloyer(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy')) <> 0 OR ops$ml.iget_fraisretard(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy')) <> 0 OR ops$ml.iget_prestations(a.id_affaire, i.ident_gestion, to_date('31/07/2025', 'dd/mm/yyyy')) <> 0) ORDER BY 1, 4, 5"
+}
+,
+{
+  "id": 17,
+  "titre": "Situation des clients",
+  "description": "Calcule pour chaque client et chaque affaire le risque global, en combinant impayés, encours et frais, et fournit la situation complète des contrats financiers actifs.",
+  "categorie": "Finance / Clients",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux liés aux clients",
+    "TIERS": "Informations sur les clients"
+  },
+  "colonnes": {
+    "TIERS_CLIENT": {
+      "description": "Code du client",
+      "alias_sql": "tiers_client",
+      "reference": "a.tiers_client",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant de l’affaire",
+      "alias_sql": "ie_affaire",
+      "reference": "a.ie_affaire",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "LIBELLE": {
+      "description": "Libellé ou description de l’affaire",
+      "alias_sql": "libelle",
+      "reference": "a.libelle",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "MT_HT": {
+      "description": "Montant initial du financement HT",
+      "alias_sql": "mt_ht",
+      "reference": "ops$ml.aget_financementinitial(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "DTMEL": {
+      "description": "Date de création de l’affaire",
+      "alias_sql": "dtmel",
+      "reference": "TO_DATE(a.date_mel, 'j')",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "LOYER": {
+      "description": "Loyer TTC calculé",
+      "alias_sql": "loyer",
+      "reference": "ops$ml.AGet_LoyerTTC(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "DUREE": {
+      "description": "Durée du contrat",
+      "alias_sql": "duree",
+      "reference": "ops$ml.aget_duree(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MTREGLES": {
+      "description": "Montants réglés",
+      "alias_sql": "mtregles",
+      "reference": "ops$ml.aget_reglement(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MTLOYERRESTANT": {
+      "description": "Montant restant à rembourser",
+      "alias_sql": "mtloyerrestant",
+      "reference": "ops$ml.aget_restantdu(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "DUREEREST": {
+      "description": "Durée restante du contrat",
+      "alias_sql": "dureerest",
+      "reference": "ops$ml.aget_dureerestante(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "ENCOURS": {
+      "description": "Encours du contrat",
+      "alias_sql": "encours",
+      "reference": "ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "IMPAYESLOYER": {
+      "description": "Loyers impayés",
+      "alias_sql": "impayesloyer",
+      "reference": "ops$ml.aget_soldeloyer(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "INTERETS": {
+      "description": "Intérêts de retard",
+      "alias_sql": "interets",
+      "reference": "ops$ml.aget_fraisretard(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "FRAIS": {
+      "description": "Frais sans retard",
+      "alias_sql": "frais",
+      "reference": "ops$ml.aget_fraissansretard(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "RISQUE": {
+      "description": "Risque total (encours + impayés + intérêts + frais)",
+      "alias_sql": "risque",
+      "reference": "ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) + ops$ml.aget_soldeloyer(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) + ops$ml.aget_fraisretard(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) + ops$ml.aget_fraissansretard(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))",
+      "type_relation": "calcul",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date pour calcul des soldes et encours (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quelle est la situation globale des clients pour juillet 2025 ?",
+    "Montre-moi le risque total par affaire pour chaque client",
+    "Quels sont les montants impayés et encours par client ?"
+  ],
+  "filtres_possibles": [
+    "TIERS_CLIENT",
+    "IE_AFFAIRE",
+    "DTMEL >= ...",
+    "RISQUE > X"
+  ],
+  "requete_sql": "SELECT a.tiers_client, a.ie_affaire, a.libelle, ops$ml.aget_financementinitial(a.id_affaire) AS mt_ht, TO_DATE(a.date_mel, 'j') AS dtmel, ops$ml.AGet_LoyerTTC(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS loyer, ops$ml.aget_duree(a.id_affaire) AS duree, ops$ml.aget_reglement(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS mtregles, ops$ml.aget_restantdu(a.id_affaire) AS mtloyerrestant, ops$ml.aget_dureerestante(a.id_affaire) AS dureerest, ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS Encours, ops$ml.aget_soldeloyer(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS ImpayesLoyer, ops$ml.aget_fraisretard(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS Interets, ops$ml.aget_fraissansretard(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS Frais, ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) + ops$ml.aget_soldeloyer(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) + ops$ml.aget_fraisretard(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) + ops$ml.aget_fraissansretard(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')) AS risque FROM affaire a, tiers t WHERE a.code_statut_impose IN ('AMEL', 'AFIN') AND a.tiers_client = t.tiers ORDER BY a.tiers_client, a.ie_affaire"
+}
+,
+{
+  "id": 18,
+  "titre": "Etat des approbations par secteur d'activité (détaillé)",
+  "description": "Pour chaque affaire approuvée, cette requête montre le client et son secteur d’activité, le type et le libellé du bien financé, le montant du financement et la date d’approbation. Utile pour analyser la distribution des approbations par secteur et le portefeuille d’affaires approuvées.",
+  "categorie": "Finance / Approvals",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux liés aux clients",
+    "TIERS": "Informations sur les clients",
+    "HISTOSTAT": "Historique des statuts des affaires"
+  },
+  "colonnes": {
+    "TIERS_CLIENT": {
+      "description": "Code du client",
+      "alias_sql": "tiers_client",
+      "reference": "a.tiers_client",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant de l’affaire",
+      "alias_sql": "ie_affaire",
+      "reference": "a.ie_affaire",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "LIBELLE": {
+      "description": "Libellé ou description de l’affaire",
+      "alias_sql": "libelle",
+      "reference": "a.libelle",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "HDATE_STATUT": {
+      "description": "Date de la première approbation",
+      "alias_sql": "date_approbation",
+      "reference": "MIN(h.date_statut)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "OBJET": {
+      "description": "Libellé du bien financé",
+      "alias_sql": "objet",
+      "reference": "ops$ml.aget_bien_libelle(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "BIEN": {
+      "description": "Type du bien financé",
+      "alias_sql": "bien",
+      "reference": "ops$ml.aget_bien_typelong(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "SECTEUR": {
+      "description": "Secteur d’activité du client",
+      "alias_sql": "secteur",
+      "reference": "ops$ml.get_libcodif('SECT', t.code_activite)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "BL": {
+      "description": "Montant du financement",
+      "alias_sql": "bl",
+      "reference": "ops$ml.aget_financement(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date pour filtrer la première approbation (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les affaires approuvées par secteur",
+    "Quels sont les clients et types de biens approuvés en juillet 2025 ?",
+    "Liste des approbations par secteur d’activité"
+  ],
+  "filtres_possibles": [
+    "TIERS_CLIENT",
+    "IE_AFFAIRE",
+    "SECTEUR",
+    "DATE_APPROBATION >= ...",
+    "BL > X"
+  ],
+  "requete_sql": "SELECT tiers_client, ie_affaire, libelle, TO_DATE(hdate_statut, 'j') AS date_approbation, objet, bien, secteur, bl FROM (SELECT a.tiers_client, a.ie_affaire, a.libelle, a.date_mel, ops$ml.aget_bien_libelle(a.id_affaire) AS objet, ops$ml.aget_bien_typelong(a.id_affaire) AS bien, ops$ml.get_libcodif('SECT', t.code_activite) AS secteur, ops$ml.aget_financement(a.id_affaire) AS bl, MIN(h.date_statut) AS hdate_statut, a.code_statut, a.code_categorie_affaire AS categorie, t.code_activite, a.id_affaire, a.code_offre FROM histostat h, affaire a, tiers t WHERE h.id_objet = a.id_affaire AND t.tiers = a.tiers_client AND h.code_type_dossier = 'AFF' AND h.code_statut = 'A020' GROUP BY a.tiers_client, a.ie_affaire, a.libelle, a.date_mel, a.id_affaire, t.code_activite, a.code_statut, a.code_categorie_affaire, t.code_activite, a.code_offre) t ORDER BY 7, 2"
+}
+,
+{
+  "id": 19,
+  "titre": "Etat des approbations par gouvernorat",
+  "description": "Vue géographique des affaires approuvées : nombre de clients et d’affaires par gouvernorat, montant total financé et part relative du financement par région. Utile pour analyser la distribution régionale du portefeuille approuvé.",
+  "categorie": "Finance / Approvals",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux liés aux clients",
+    "TIERS": "Informations sur les clients",
+    "HISTOSTAT": "Historique des statuts des affaires"
+  },
+  "colonnes": {
+    "GOUVERNORAT": {
+      "description": "Gouvernorat du client",
+      "alias_sql": "gouvernorat",
+      "reference": "ops$ml.tget_gouvernorat(a.tiers_client)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "TIERS_CLIENT": {
+      "description": "Code du client",
+      "alias_sql": "tiers_client",
+      "reference": "a.tiers_client",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant de l’affaire",
+      "alias_sql": "ie_affaire",
+      "reference": "a.ie_affaire",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "MTHt": {
+      "description": "Montant du financement HT",
+      "alias_sql": "mtht",
+      "reference": "ops$ml.aget_financement(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "RATIO": {
+      "description": "Part relative du financement par gouvernorat",
+      "alias_sql": "ratio",
+      "reference": "RATIO_TO_REPORT(SUM(mtht)) OVER()",
+      "type_relation": "fonction",
+      "filtrable": false
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date pour filtrer les approbations (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi la répartition des approbations par gouvernorat",
+    "Quels sont les montants financés par région ?",
+    "Combien de clients approuvés par gouvernorat ?"
+  ],
+  "filtres_possibles": [
+    "GOUVERNORAT",
+    "DATE_APPROBATION >= ...",
+    "MTHt > X"
+  ],
+  "requete_sql": "SELECT gouvernorat, COUNT(DISTINCT tiers_client), COUNT(DISTINCT ie_affaire), SUM(mtht), RATIO_TO_REPORT(SUM(mtht)) OVER() AS ratio FROM (SELECT ops$ml.tget_gouvernorat(a.tiers_client) AS gouvernorat, a.tiers_client, a.id_affaire, a.ie_affaire, ops$ml.aget_financement(a.id_affaire) AS mtht, a.code_statut, MIN(h.date_statut) AS hdate_statut FROM histostat h, affaire a, tiers t WHERE h.id_objet = a.id_affaire AND t.tiers = a.tiers_client AND h.code_type_dossier ='AFF' AND h.code_statut = 'A020' GROUP BY ops$ml.tget_gouvernorat(a.tiers_client), a.id_affaire, a.tiers_client, a.ie_affaire, ops$ml.aget_financement(a.id_affaire), a.code_statut) GROUP BY gouvernorat ORDER BY 1"
+}
+,
+{
+  "id": 20,
+  "titre": "Etat des MEF par secteur d'activité (détaillé)",
+  "description": "Vue détaillée des montants à encaisser (MEF) par secteur : pour chaque client et affaire, on voit le montant des MEF et le secteur d’activité. Utile pour le suivi financier sectoriel et l’analyse de portefeuille.",
+  "categorie": "Finance / MEF",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux liés aux clients",
+    "DETARRLOY": "Détails des montants à encaisser (MEF)",
+    "TIERS": "Informations sur les clients"
+  },
+  "colonnes": {
+    "TIERS_CLIENT": {
+      "description": "Code du client",
+      "alias_sql": "tiers_client",
+      "reference": "a.tiers_client",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant de l’affaire",
+      "alias_sql": "ie_affaire",
+      "reference": "a.ie_affaire",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "LIBELLE": {
+      "description": "Libellé de l’affaire",
+      "alias_sql": "libelle",
+      "reference": "a.libelle",
+      "type_relation": "colonne",
+      "filtrable": false
+    },
+    "DTMEL": {
+      "description": "Date de mise en ligne de l’affaire",
+      "alias_sql": "dtmel",
+      "reference": "TO_DATE(a.date_mel, 'j')",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "OBJET": {
+      "description": "Libellé du bien financé",
+      "alias_sql": "objet",
+      "reference": "ops$ml.aget_bien_libelle(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "BIEN": {
+      "description": "Type de bien financé",
+      "alias_sql": "bien",
+      "reference": "ops$ml.aget_bien_typelong(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "SECTEUR": {
+      "description": "Secteur d’activité du client",
+      "alias_sql": "secteur",
+      "reference": "ops$ml.get_libcodif('SECT', t.code_activite)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "BL": {
+      "description": "Montant à encaisser (MEF)",
+      "alias_sql": "bl",
+      "reference": "SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0))",
+      "type_relation": "fonction",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date pour filtrer les MEF (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les MEF détaillés par secteur d'activité",
+    "Quels sont les montants à encaisser par client et secteur ?",
+    "Liste les affaires par secteur avec les MEF"
+  ],
+  "filtres_possibles": [
+    "SECTEUR",
+    "DATE_MEL >= ...",
+    "TIERS_CLIENT",
+    "BL > X"
+  ],
+  "requete_sql": "SELECT a.tiers_client, a.ie_affaire, a.libelle, TO_DATE(a.date_mel, 'j') AS dtmel, ops$ml.aget_bien_libelle(a.id_affaire) AS objet, ops$ml.aget_bien_typelong(a.id_affaire) AS bien, ops$ml.get_libcodif('SECT', t.code_activite) AS secteur, SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0)) AS bl FROM affaire a, detarrloy d, tiers t WHERE a.id_affaire = d.id_affaire AND d.code_type_dossier = 'MELO' AND a.tiers_client = t.tiers AND a.code_statut NOT IN ('A090', 'A900', 'A950') GROUP BY a.tiers_client, a.ie_affaire, a.libelle, a.date_mel, a.id_affaire, t.code_activite ORDER BY 7, 2"
+}
+,
+{
+  "id": 21,
+  "titre": "Etat des MEF par gouvernorat",
+  "description": "Vue consolidée des mises en force (MEF) par gouvernorat : nombre de clients, nombre d’affaires, montant total des MEF et part relative de chaque gouvernorat dans le total national.",
+  "categorie": "Finance / MEF",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux liés aux clients",
+    "DETARRLOY": "Détails des montants à encaisser (MEF)",
+    "TIERS": "Informations sur les clients"
+  },
+  "colonnes": {
+    "GOUVERNORAT": {
+      "description": "Nom du gouvernorat",
+      "alias_sql": "GOUVERNORAT",
+      "reference": "ops$ml.tget_gouvernorat(a.tiers_client)",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "NB_CLIENTS": {
+      "description": "Nombre distinct de clients dans le gouvernorat",
+      "alias_sql": "NB_CLIENTS",
+      "reference": "COUNT(DISTINCT a.tiers_client)",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "NB_AFFAIRES": {
+      "description": "Nombre distinct d’affaires dans le gouvernorat",
+      "alias_sql": "NB_AFFAIRES",
+      "reference": "COUNT(DISTINCT a.ie_affaire)",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "BL": {
+      "description": "Montant total des mises en force (MEF)",
+      "alias_sql": "BL",
+      "reference": "SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "PART_RELATIVE": {
+      "description": "Part relative du gouvernorat par rapport au total national",
+      "alias_sql": "PART_RELATIVE",
+      "reference": "RATIO_TO_REPORT(SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0))) OVER()",
+      "type_relation": "fonction",
+      "filtrable": false
+    }
+  },
+  "parametres": {
+    "date_reference": "Date pour filtrer les MEF (JJ/MM/AAAA)"
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les MEF par gouvernorat",
+    "Quels gouvernorats ont le plus de montants à encaisser ?",
+    "Liste le total des MEF par région"
+  ],
+  "filtres_possibles": [
+    "GOUVERNORAT",
+    "BL > X",
+    "NB_CLIENTS > Y"
+  ],
+  "requete_sql": "SELECT ops$ml.tget_gouvernorat(a.tiers_client) gouvernorat, COUNT(DISTINCT a.tiers_client), COUNT(DISTINCT a.ie_affaire), SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0)) bl, RATIO_TO_REPORT(SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0))) OVER() FROM affaire a, detarrloy d, tiers t WHERE a.id_affaire = d.id_affaire AND d.code_type_dossier = 'MELO' AND a.tiers_client = t.tiers AND a.code_statut NOT IN ('A090', 'A900', 'A950') GROUP BY ops$ml.tget_gouvernorat(a.tiers_client) ORDER BY 1"
+}
+,
+{
+  "id": 22,
+  "titre": "Etat des MEF par commercial",
+  "description": "Vue consolidée des mises en force (MEF) par commercial : nombre de clients, nombre d’affaires, montant total des MEF et part relative de chaque commercial dans le total global.",
+  "categorie": "Finance / MEF",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux liés aux clients",
+    "DETARRLOY": "Détails des montants à encaisser (MEF)",
+    "TIERS": "Informations sur les clients"
+  },
+  "colonnes": {
+    "COMMERCIAL": {
+      "description": "Nom du commercial en charge du client",
+      "alias_sql": "COMMERCIAL",
+      "reference": "ops$ml.tget_commercial(a.tiers_client)",
+      "type_relation": "fonction_calcul",
+      "filtrable": true
+    },
+    "NB_CLIENTS": {
+      "description": "Nombre distinct de clients suivis par le commercial",
+      "alias_sql": "NB_CLIENTS",
+      "reference": "COUNT(DISTINCT a.tiers_client)",
+      "type_relation": "fonction_calcul",
+      "filtrable": true
+    },
+    "NB_AFFAIRES": {
+      "description": "Nombre distinct d’affaires gérées par le commercial",
+      "alias_sql": "NB_AFFAIRES",
+      "reference": "COUNT(DISTINCT a.id_affaire)",
+      "type_relation": "fonction_calcul",
+      "filtrable": false
+    },
+    "BL": {
+      "description": "Montant total des mises en force (MEF)",
+      "alias_sql": "BL",
+      "reference": "SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0))",
+      "type_relation": "fonction_calcul",
+      "filtrable": true
+    },
+    "PART_RELATIVE": {
+      "description": "Part relative du commercial par rapport au total global",
+      "alias_sql": "PART_RELATIVE",
+      "reference": "RATIO_TO_REPORT(SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0))) OVER()",
+      "type_relation": "fonction_calcul",
+      "filtrable": false
+    }
+  },
+  "parametres": {
+    "date_reference": "Date pour filtrer les MEF (JJ/MM/AAAA)"
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les MEF par commercial",
+    "Quels commerciaux ont le plus de montants à encaisser ?",
+    "Liste le total des MEF par commercial"
+  ],
+  "filtres_possibles": [
+    "COMMERCIAL",
+    "BL > X",
+    "NB_CLIENTS > Y"
+  ],
+  "requete_sql": "SELECT ops$ml.tget_commercial(a.tiers_client) COMMERCIAL, COUNT(DISTINCT a.tiers_client) NB_CLIENTS, COUNT(DISTINCT a.id_affaire) NB_AFFAIRES, SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0)) BL, RATIO_TO_REPORT(SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0))) OVER() PART_RELATIVE FROM affaire a, detarrloy d, tiers t WHERE a.id_affaire = d.id_affaire AND d.code_type_dossier = 'MELO' AND a.tiers_client = t.tiers AND a.code_statut NOT IN ('A090', 'A900', 'A950') GROUP BY ops$ml.tget_commercial(a.tiers_client) ORDER BY 1"
+}
+,
+{
+  "id": 23,
+  "titre": "Etat des encours par secteur d’activité",
+  "description": "Vue consolidée des encours totaux par secteur d’activité au 31/07/2025, avec nombre de clients, nombre d’affaires, montant total des encours et part relative de chaque secteur.",
+  "categorie": "Finance / Encours",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux liés aux clients",
+    "TIERS": "Informations sur les clients"
+  },
+  "colonnes": {
+    "SECTEUR": {
+      "description": "Secteur d’activité du client",
+      "alias_sql": "SECTEUR",
+      "reference": "ops$ml.Get_Secteur(t.code_activite)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "NB_CLIENTS": {
+      "description": "Nombre distinct de clients dans le secteur",
+      "alias_sql": "NB_CLIENTS",
+      "reference": "COUNT(DISTINCT a.tiers_client)",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "NB_AFFAIRES": {
+      "description": "Nombre distinct d’affaires dans le secteur",
+      "alias_sql": "NB_AFFAIRES",
+      "reference": "COUNT(DISTINCT a.ie_affaire)",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "ENCOURS": {
+      "description": "Montant total des encours",
+      "alias_sql": "ENCOURS",
+      "reference": "SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "PART_RELATIVE": {
+      "description": "Part relative du secteur par rapport au total",
+      "alias_sql": "PART_RELATIVE",
+      "reference": "RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER()",
+      "type_relation": "fonction",
+      "filtrable": false
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de calcul des encours (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les encours par secteur",
+    "Quels secteurs ont le plus d’encours ?",
+    "Liste les encours totaux par secteur d’activité"
+  ],
+  "filtres_possibles": [
+    "SECTEUR",
+    "ENCOURS > X",
+    "NB_CLIENTS > Y"
+  ],
+  "requete_sql": "SELECT ops$ml.Get_Secteur(t.code_activite) SECTEUR, COUNT(DISTINCT a.tiers_client) NB_CLIENTS, COUNT(DISTINCT a.ie_affaire) NB_AFFAIRES, SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025','dd/mm/yyyy'))) ENCOURS, RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025','dd/mm/yyyy')))) OVER() PART_RELATIVE FROM affaire a, tiers t WHERE a.tiers_client = t.tiers AND a.code_statut_impose IN ('AMEL','AFIN') GROUP BY ops$ml.Get_Secteur(t.code_activite) ORDER BY 1"
+}
+,
+{
+  "id": 24,
+  "titre": "Etat des encours par type de bien",
+  "description": "Vue consolidée des encours totaux par type de bien financé au 31/07/2025, avec nombre de clients, nombre d’affaires, montant total des encours et part relative de chaque type de bien.",
+  "categorie": "Finance / Encours",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux liés aux clients",
+    "TIERS": "Informations sur les clients"
+  },
+  "colonnes": {
+    "TYPE_BIEN": {
+      "description": "Type de bien financé (voiture, machine, immeuble, etc.)",
+      "alias_sql": "TYPE_BIEN",
+      "reference": "ops$ml.aget_bien_typegroupe(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "NB_CLIENTS": {
+      "description": "Nombre distinct de clients pour ce type de bien",
+      "alias_sql": "NB_CLIENTS",
+      "reference": "COUNT(DISTINCT a.tiers_client)",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "NB_AFFAIRES": {
+      "description": "Nombre distinct d’affaires pour ce type de bien",
+      "alias_sql": "NB_AFFAIRES",
+      "reference": "COUNT(DISTINCT a.ie_affaire)",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "ENCOURS": {
+      "description": "Montant total des encours pour ce type de bien",
+      "alias_sql": "ENCOURS",
+      "reference": "SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "PART_RELATIVE": {
+      "description": "Part relative du type de bien dans l’encours total",
+      "alias_sql": "PART_RELATIVE",
+      "reference": "RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER()",
+      "type_relation": "fonction",
+      "filtrable": false
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de calcul des encours (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les encours par type de bien",
+    "Quels types de biens ont le plus d’encours ?",
+    "Liste les encours totaux par catégorie de bien"
+  ],
+  "filtres_possibles": [
+    "TYPE_BIEN",
+    "ENCOURS > X",
+    "NB_CLIENTS > Y"
+  ],
+  "requete_sql": "SELECT ops$ml.aget_bien_typegroupe(a.id_affaire) TYPE_BIEN, COUNT(DISTINCT a.tiers_client) NB_CLIENTS, COUNT(DISTINCT a.ie_affaire) NB_AFFAIRES, SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025','dd/mm/yyyy'))) ENCOURS, RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025','dd/mm/yyyy')))) OVER() PART_RELATIVE FROM affaire a, tiers t WHERE a.tiers_client = t.tiers AND a.code_statut_impose IN ('AMEL','AFIN') GROUP BY ops$ml.aget_bien_typegroupe(a.id_affaire) ORDER BY 1"
+}
+,
+{
+  "id": 25,
+  "titre": "Etat des encours par gouvernorat",
+  "description": "Tableau de bord des encours totaux par gouvernorat au 31/07/2025, avec nombre de clients, nombre d’affaires, montant total des encours et part relative de chaque région.",
+  "categorie": "Finance / Encours",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux liés aux clients",
+    "TIERS": "Informations sur les clients"
+  },
+  "colonnes": {
+    "GOUVERNORAT": {
+      "description": "Nom du gouvernorat de résidence du client",
+      "alias_sql": "GOUVERNORAT",
+      "reference": "ops$ml.tget_gouvernorat(a.tiers_client)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "NB_CLIENTS": {
+      "description": "Nombre distinct de clients dans le gouvernorat",
+      "alias_sql": "NB_CLIENTS",
+      "reference": "COUNT(DISTINCT a.tiers_client)",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "NB_AFFAIRES": {
+      "description": "Nombre distinct d’affaires pour le gouvernorat",
+      "alias_sql": "NB_AFFAIRES",
+      "reference": "COUNT(DISTINCT a.ie_affaire)",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "ENCOURS": {
+      "description": "Montant total des encours pour le gouvernorat",
+      "alias_sql": "ENCOURS",
+      "reference": "SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "PART_RELATIVE": {
+      "description": "Part de chaque gouvernorat dans l’encours total",
+      "alias_sql": "PART_RELATIVE",
+      "reference": "RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER()",
+      "type_relation": "fonction",
+      "filtrable": false
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de calcul des encours (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi les encours par gouvernorat",
+    "Quels gouvernorats ont le plus d’encours ?",
+    "Liste les encours totaux par région"
+  ],
+  "filtres_possibles": [
+    "GOUVERNORAT",
+    "ENCOURS > X",
+    "NB_CLIENTS > Y"
+  ],
+  "requete_sql": "SELECT ops$ml.tget_gouvernorat(a.tiers_client) GOUVERNORAT, COUNT(DISTINCT a.tiers_client) NB_CLIENTS, COUNT(DISTINCT a.ie_affaire) NB_AFFAIRES, SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025','dd/mm/yyyy'))) ENCOURS, RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025','dd/mm/yyyy')))) OVER() PART_RELATIVE FROM affaire a, tiers t WHERE a.tiers_client = t.tiers AND a.code_statut_impose IN ('AMEL','AFIN') GROUP BY ops$ml.tget_gouvernorat(a.tiers_client) ORDER BY 1"
+}
+,
+{
+  "id": 26,
+  "titre": "Etat de chiffre d’affaire par fournisseur (Global)",
+  "description": "Vue globale du chiffre d’affaires par fournisseur, incluant le montant total facturé, le nombre d’opérations et le délai moyen de traitement des affaires.",
+  "categorie": "Finance / Chiffre d’affaires",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux liés aux clients",
+    "DETARRLOY": "Détails des arrangements financiers (MEF)",
+    "COMMANDE": "Commandes liées aux affaires",
+    "TIERS": "Informations sur les fournisseurs"
+  },
+  "colonnes": {
+    "FOURNISSEUR": {
+      "description": "Code du fournisseur",
+      "alias_sql": "FOURNISSEUR",
+      "reference": "c.tiers",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "NOM_FOURNISSEUR": {
+      "description": "Nom du fournisseur",
+      "alias_sql": "NOM_FOURNISSEUR",
+      "reference": "t.nomaff_tiers",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "TOTAL_BL": {
+      "description": "Montant total facturé (ajusté)",
+      "alias_sql": "TOTAL_BL",
+      "reference": "SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "NB_OPERATIONS": {
+      "description": "Nombre d’opérations pour ce fournisseur",
+      "alias_sql": "NB_OPERATIONS",
+      "reference": "COUNT(*)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "DELAI_MOYEN": {
+      "description": "Délai moyen de traitement des affaires",
+      "alias_sql": "DELAI_MOYEN",
+      "reference": "AVG(OPS$ML.AGet_Fournisseur_Delai(a.id_affaire))",
+      "type_relation": "fonction",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de calcul des encours ou BL (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi le chiffre d’affaires par fournisseur",
+    "Quels fournisseurs ont le plus de BL ?",
+    "Délai moyen des fournisseurs pour les affaires"
+  ],
+  "filtres_possibles": [
+    "FOURNISSEUR",
+    "TOTAL_BL > X",
+    "NB_OPERATIONS > Y",
+    "DELAI_MOYEN < Z"
+  ],
+  "requete_sql": "SELECT c.tiers FOURNISSEUR, t.nomaff_tiers NOM_FOURNISSEUR, SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0)) TOTAL_BL, COUNT(*) NB_OPERATIONS, AVG(OPS$ML.AGet_Fournisseur_Delai(a.id_affaire)) DELAI_MOYEN FROM affaire a, detarrloy d, (SELECT id_affaire, tiers FROM commande WHERE id_commande IN (SELECT MIN(id_commande) FROM commande GROUP BY id_affaire)) c, tiers t WHERE a.id_affaire = d.id_affaire AND d.code_type_dossier = 'MELO' AND c.id_affaire = a.id_affaire AND c.tiers = t.tiers GROUP BY c.tiers, t.nomaff_tiers ORDER BY 1"
+}
+,
+{
+  "id": 27,
+  "titre": "Etat de chiffre d’affaire par fournisseur (Détaillé)",
+  "description": "Vue détaillée des affaires par fournisseur, avec le code et nom du fournisseur, numéro et libellé de l’affaire, objet et montant du CA (BL).",
+  "categorie": "Finance / Chiffre d’affaires",
+  "tables": {
+    "AFFAIRE": "Dossiers commerciaux liés aux clients",
+    "DETARRLOY": "Détails des arrangements financiers (MEF)",
+    "COMMANDE": "Commandes liées aux affaires",
+    "TIERS": "Informations sur les fournisseurs"
+  },
+  "colonnes": {
+    "FOURNISSEUR": {
+      "description": "Code du fournisseur",
+      "alias_sql": "FOURNISSEUR",
+      "reference": "c.tiers",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "NOM_FOURNISSEUR": {
+      "description": "Nom du fournisseur",
+      "alias_sql": "NOM_FOURNISSEUR",
+      "reference": "t.nomaff_tiers",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant de l’affaire",
+      "alias_sql": "IE_AFFAIRE",
+      "reference": "a.ie_affaire",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "LIBELLE": {
+      "description": "Libellé de l’affaire",
+      "alias_sql": "LIBELLE",
+      "reference": "a.libelle",
+      "type_relation": "colonne",
+      "filtrable": true
+    },
+    "OBJET": {
+      "description": "Désignation ou objet de l’affaire",
+      "alias_sql": "OBJET",
+      "reference": "ekr_lib_aff_des1_bie(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "BL": {
+      "description": "Montant du chiffre d’affaires (BL)",
+      "alias_sql": "BL",
+      "reference": "NVL((vib + ecart_bl_cou) * code_sens_ni, 0)",
+      "type_relation": "fonction",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de calcul des encours ou BL (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi toutes les affaires par fournisseur",
+    "Quels BL pour chaque affaire d’un fournisseur ?",
+    "Détail des affaires et montant par fournisseur"
+  ],
+  "filtres_possibles": [
+    "FOURNISSEUR",
+    "IE_AFFAIRE",
+    "BL > X",
+    "OBJET",
+    "LIBELLE"
+  ],
+  "requete_sql": "SELECT c.tiers FOURNISSEUR, t.nomaff_tiers NOM_FOURNISSEUR, a.ie_affaire IE_AFFAIRE, a.libelle LIBELLE, ekr_lib_aff_des1_bie(a.id_affaire) OBJET, NVL((vib + ecart_bl_cou) * code_sens_ni, 0) BL FROM affaire a, detarrloy d, (SELECT id_affaire, tiers FROM commande WHERE id_commande IN (SELECT MIN(id_commande) FROM commande GROUP BY id_affaire)) c, tiers t WHERE a.id_affaire = d.id_affaire AND d.code_type_dossier = 'MELO' AND c.id_affaire = a.id_affaire AND c.tiers = t.tiers ORDER BY 1, 3"
+}
+,
+{
+  "id": 28,
+  "titre": "Etat des risques par secteur d’activité",
+  "description": "Mesure l’exposition au risque par secteur d’activité : financements accordés, encours restant, impayés et part dans le portefeuille total.",
+  "categorie": "Finance / Risques",
+  "tables": {
+    "AFFAIRE": "Dossiers clients et informations financières",
+    "TIERS": "Informations sur les clients et leur secteur d’activité"
+  },
+  "colonnes": {
+    "SECTEUR": {
+      "description": "Secteur d’activité du client",
+      "alias_sql": "SECTEUR",
+      "reference": "ops$ml.Get_Secteur(t.code_activite)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MEL": {
+      "description": "Montant financé (MEF)",
+      "alias_sql": "MEL",
+      "reference": "SUM(ops$ml.aget_financement(a.id_affaire))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "ENCOURS": {
+      "description": "Montant restant dû",
+      "alias_sql": "ENCOURS",
+      "reference": "SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "IMPAYES": {
+      "description": "Montant des impayés",
+      "alias_sql": "IMPAYES",
+      "reference": "SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "RISQUE": {
+      "description": "Somme encours + impayés",
+      "alias_sql": "RISQUE",
+      "reference": "SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) + SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "POIDS_PORTFOLIO": {
+      "description": "Part du risque dans le portefeuille total",
+      "alias_sql": "POIDS_PORTFOLIO",
+      "reference": "RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) + SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER()",
+      "type_relation": "fonction",
+      "filtrable": false
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date de calcul des encours et impayés (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Montre-moi le risque par secteur d’activité",
+    "Quels secteurs ont le plus d’impayés ?",
+    "Encours et impayés par secteur pour la date du 31/07/2025"
+  ],
+  "filtres_possibles": [
+    "SECTEUR",
+    "MEL > X",
+    "ENCOURS > X",
+    "IMPAYES > X",
+    "RISQUE > X"
+  ],
+  "requete_sql": "SELECT ops$ml.Get_Secteur(t.code_activite) SECTEUR, SUM(ops$ml.aget_financement(a.id_affaire)) MEL, SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) ENCOURS, SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) IMPAYES, SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) + SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) RISQUE, RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) + SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER() POIDS_PORTFOLIO FROM affaire a, tiers t WHERE a.tiers_client = t.tiers GROUP BY ops$ml.Get_Secteur(t.code_activite) ORDER BY 1"
+}
+,
+{
+  "id": 29,
+  "titre": "Etat des risques par type de bien",
+  "description": "Analyse la contribution de chaque type de bien au risque global du portefeuille (encours + impayés).",
+  "categorie": "Finance / Risques",
+  "tables": {
+    "AFFAIRE": "Dossiers clients et informations financières"
+  },
+  "colonnes": {
+    "TYPE_BIEN": {
+      "description": "Type de bien financé (voiture, machine, immeuble, etc.)",
+      "alias_sql": "TYPE_BIEN",
+      "reference": "ops$ml.aget_bien_typegroupe(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "ENCOURS": {
+      "description": "Montant restant dû par type de bien",
+      "alias_sql": "ENCOURS",
+      "reference": "SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "IMPAYES": {
+      "description": "Montant des impayés par type de bien",
+      "alias_sql": "IMPAYES",
+      "reference": "SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "RISQUE": {
+      "description": "Somme encours + impayés par type de bien",
+      "alias_sql": "RISQUE",
+      "reference": "SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) + SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "POIDS_PORTFOLIO": {
+      "description": "Part du risque total représenté par chaque type de bien",
+      "alias_sql": "POIDS_PORTFOLIO",
+      "reference": "RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) + SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER()",
+      "type_relation": "fonction",
+      "filtrable": false
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date pour le calcul des encours et impayés (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quel type de bien présente le plus de risque ?",
+    "Risque total par type de bien au 31/07/2025",
+    "Montant des impayés par type de bien"
+  ],
+  "filtres_possibles": [
+    "TYPE_BIEN",
+    "ENCOURS > X",
+    "IMPAYES > X",
+    "RISQUE > X"
+  ],
+  "requete_sql": "SELECT ops$ml.aget_bien_typegroupe(a.id_affaire) TYPE_BIEN, SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) ENCOURS, SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) IMPAYES, SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) + SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) RISQUE, RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) + SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER() POIDS_PORTFOLIO FROM affaire a GROUP BY ops$ml.aget_bien_typegroupe(a.id_affaire) ORDER BY 1"
+}
+,
+{
+  "id": 30,
+  "titre": "Etat des risques par gouvernorat",
+  "description": "Analyse la répartition des risques (encours + impayés) par gouvernorat et la part relative de chaque région dans le risque global du portefeuille.",
+  "categorie": "Finance / Risques",
+  "tables": {
+    "AFFAIRE": "Dossiers clients et informations financières",
+    "TIERS": "Informations clients (dont gouvernorat)"
+  },
+  "colonnes": {
+    "GOUVERNORAT": {
+      "description": "Nom du gouvernorat / région du client",
+      "alias_sql": "GOUVERNORAT",
+      "reference": "ops$ml.tget_gouvernorat(t.tiers)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "ENCOURS": {
+      "description": "Montant total des encours par gouvernorat",
+      "alias_sql": "ENCOURS",
+      "reference": "SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "IMPAYES": {
+      "description": "Montant total des impayés par gouvernorat",
+      "alias_sql": "IMPAYES",
+      "reference": "SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "RISQUE": {
+      "description": "Somme encours + impayés par gouvernorat",
+      "alias_sql": "RISQUE",
+      "reference": "SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) + SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "POIDS_PORTFOLIO": {
+      "description": "Part du risque global représentée par le gouvernorat",
+      "alias_sql": "POIDS_PORTFOLIO",
+      "reference": "RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) + SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER()",
+      "type_relation": "fonction",
+      "filtrable": false
+    }
+  },
+  "parametres": {
+    "date_reference": {
+      "description": "Date pour le calcul des encours et impayés (JJ/MM/AAAA)",
+      "obligatoire": true
+    }
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quel gouvernorat présente le plus de risque ?",
+    "Répartition des encours et impayés par région au 31/07/2025",
+    "Part relative de chaque gouvernorat dans le portefeuille à risque"
+  ],
+  "filtres_possibles": [
+    "GOUVERNORAT",
+    "ENCOURS > X",
+    "IMPAYES > X",
+    "RISQUE > X"
+  ],
+  "requete_sql": "SELECT ops$ml.tget_gouvernorat(t.tiers) GOUVERNORAT, SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) ENCOURS, SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) IMPAYES, SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) + SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) RISQUE, RATIO_TO_REPORT(SUM(ops$ml.aget_encours(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) + SUM(ops$ml.aget_soldecmtbp(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))) OVER() POIDS_PORTFOLIO FROM affaire a, tiers t WHERE a.tiers_client = t.tiers GROUP BY ops$ml.tget_gouvernorat(t.tiers) ORDER BY 1"
+}
+,
+{
+  "id": 31,
+  "titre": "Etat de suivi des agences",
+  "description": "Tableau de suivi des agences du BHL, indiquant le nombre de dossiers et les montants par étape du processus (étude, approbation, commande, MEF), avec leur part relative par rapport au total. Utile pour suivre l'activité et la performance des agences.",
+  "categorie": "Performance / Agences",
+  "tables": {
+    "AFFAIRE": "Dossiers clients et informations financières"
+  },
+  "colonnes": {
+    "AGENCE": {
+      "description": "Nom de l'agence",
+      "alias_sql": "AGENCE",
+      "reference": "ops$ml.aget_agenceml(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "NB_ETUDE": {
+      "description": "Nombre de dossiers en étude",
+      "alias_sql": "NB_ETUDE",
+      "reference": "SUM(CASE WHEN a.code_statut IN ('A000','A010','A015','A018') THEN 1 ELSE 0 END)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MT_ETUDE": {
+      "description": "Montant total des dossiers en étude",
+      "alias_sql": "MT_ETUDE",
+      "reference": "SUM(CASE WHEN a.code_statut IN ('A000','A010','A015','A018') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "PART_ETUDE": {
+      "description": "Part relative des montants en étude par rapport au total",
+      "alias_sql": "PART_ETUDE",
+      "reference": "RATIO_TO_REPORT(SUM(CASE WHEN a.code_statut IN ('A000','A010','A015','A018') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)) OVER()",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "NB_APPROUVE": {
+      "description": "Nombre de dossiers approuvés",
+      "alias_sql": "NB_APPROUVE",
+      "reference": "SUM(CASE WHEN a.code_statut IN ('A020','A021','A022','A023','A120') THEN 1 ELSE 0 END)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MT_APPROUVE": {
+      "description": "Montant total des dossiers approuvés",
+      "alias_sql": "MT_APPROUVE",
+      "reference": "SUM(CASE WHEN a.code_statut IN ('A020','A021','A022','A023','A120') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "PART_APPROUVE": {
+      "description": "Part relative des montants approuvés par rapport au total",
+      "alias_sql": "PART_APPROUVE",
+      "reference": "RATIO_TO_REPORT(SUM(CASE WHEN a.code_statut IN ('A020','A021','A022','A023','A120') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)) OVER()",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "NB_COMMANDE": {
+      "description": "Nombre de dossiers commandés",
+      "alias_sql": "NB_COMMANDE",
+      "reference": "SUM(CASE WHEN a.code_statut_impose = 'AACC' THEN 1 ELSE 0 END)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MT_COMMANDE": {
+      "description": "Montant total des dossiers commandés",
+      "alias_sql": "MT_COMMANDE",
+      "reference": "SUM(CASE WHEN a.code_statut_impose = 'AACC' THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "PART_COMMANDE": {
+      "description": "Part relative des montants commandés par rapport au total",
+      "alias_sql": "PART_COMMANDE",
+      "reference": "RATIO_TO_REPORT(SUM(CASE WHEN a.code_statut_impose = 'AACC' THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)) OVER()",
+      "type_relation": "fonction",
+      "filtrable": false
+    },
+    "NB_MEF": {
+      "description": "Nombre de dossiers en mise en force (MEF)",
+      "alias_sql": "NB_MEF",
+      "reference": "SUM(CASE WHEN a.code_statut_impose IN ('AMEL','AFIN') THEN 1 ELSE 0 END)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "MT_MEF": {
+      "description": "Montant total des dossiers en MEF",
+      "alias_sql": "MT_MEF",
+      "reference": "SUM(CASE WHEN a.code_statut_impose IN ('AMEL','AFIN') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "PART_MEF": {
+      "description": "Part relative des montants en MEF par rapport au total",
+      "alias_sql": "PART_MEF",
+      "reference": "RATIO_TO_REPORT(SUM(CASE WHEN a.code_statut_impose IN ('AMEL','AFIN') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)) OVER()",
+      "type_relation": "fonction",
+      "filtrable": false
+    }
+  },
+  "parametres": {},
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quelle agence a le plus de dossiers en étude ?",
+    "Répartition des montants par étape (étude, approbation, commande, MEF) pour chaque agence",
+    "Quelle agence contribue le plus au total des MEF ?"
+  ],
+  "filtres_possibles": [
+    "AGENCE",
+    "NB_ETUDE > X",
+    "NB_APPROUVE > X",
+    "NB_COMMANDE > X",
+    "NB_MEF > X",
+    "MT_ETUDE > X",
+    "MT_APPROUVE > X",
+    "MT_COMMANDE > X",
+    "MT_MEF > X"
+  ],
+  "requete_sql": "SELECT ops$ml.aget_agenceml(a.id_affaire) AGENCE, SUM(CASE WHEN a.code_statut IN ('A000','A010','A015','A018') THEN 1 ELSE 0 END) NB_ETUDE, SUM(CASE WHEN a.code_statut IN ('A000','A010','A015','A018') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END) MT_ETUDE, RATIO_TO_REPORT(SUM(CASE WHEN a.code_statut IN ('A000','A010','A015','A018') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)) OVER() PART_ETUDE, SUM(CASE WHEN a.code_statut IN ('A020','A021','A022','A023','A120') THEN 1 ELSE 0 END) NB_APPROUVE, SUM(CASE WHEN a.code_statut IN ('A020','A021','A022','A023','A120') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END) MT_APPROUVE, RATIO_TO_REPORT(SUM(CASE WHEN a.code_statut IN ('A020','A021','A022','A023','A120') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)) OVER() PART_APPROUVE, SUM(CASE WHEN a.code_statut_impose = 'AACC' THEN 1 ELSE 0 END) NB_COMMANDE, SUM(CASE WHEN a.code_statut_impose = 'AACC' THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END) MT_COMMANDE, RATIO_TO_REPORT(SUM(CASE WHEN a.code_statut_impose = 'AACC' THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)) OVER() PART_COMMANDE, SUM(CASE WHEN a.code_statut_impose IN ('AMEL','AFIN') THEN 1 ELSE 0 END) NB_MEF, SUM(CASE WHEN a.code_statut_impose IN ('AMEL','AFIN') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END) MT_MEF, RATIO_TO_REPORT(SUM(CASE WHEN a.code_statut_impose IN ('AMEL','AFIN') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)) OVER() PART_MEF FROM affaire a GROUP BY ops$ml.aget_agenceml(a.id_affaire) ORDER BY 1"
+}
+,
+{
+  "id": 32,
+  "titre": "Etat des taux Min et MAX par type de bien",
+  "description": "Permet d'identifier les taux d'intérêt minimum et maximum appliqués pour chaque type de bien financé, utile pour l'analyse tarifaire et le suivi des conditions de financement.",
+  "categorie": "Analyse financière / Taux",
+  "tables": {
+    "AFFAIRE": "Dossiers clients et informations financières"
+  },
+  "colonnes": {
+    "TYPE_BIEN": {
+      "description": "Type de bien financé (voiture, machine, immeuble, etc.)",
+      "alias_sql": "TYPE_BIEN",
+      "reference": "ops$ml.aget_bien_typegroupe(a.id_affaire)",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "TAUX_MIN": {
+      "description": "Taux d'intérêt minimum appliqué pour ce type de bien",
+      "alias_sql": "TAUX_MIN",
+      "reference": "MIN(ops$ml.aget_taux(a.id_affaire))",
+      "type_relation": "fonction",
+      "filtrable": true
+    },
+    "TAUX_MAX": {
+      "description": "Taux d'intérêt maximum appliqué pour ce type de bien",
+      "alias_sql": "TAUX_MAX",
+      "reference": "MAX(ops$ml.aget_taux(a.id_affaire))",
+      "type_relation": "fonction",
+      "filtrable": true
+    }
+  },
+  "parametres": {},
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quel est le taux minimum appliqué pour les voitures ?",
+    "Quel type de bien a le taux maximum le plus élevé ?",
+    "Comparer les taux appliqués entre différents types de biens"
+  ],
+  "filtres_possibles": [
+    "TYPE_BIEN",
+    "TAUX_MIN > X",
+    "TAUX_MAX < Y"
+  ],
+  "requete_sql": "SELECT ops$ml.aget_bien_typegroupe(a.id_affaire) TYPE_BIEN, MIN(ops$ml.aget_taux(a.id_affaire)) TAUX_MIN, MAX(ops$ml.aget_taux(a.id_affaire)) TAUX_MAX FROM affaire a WHERE a.code_statut_impose IN ('AMEL', 'AFIN') GROUP BY ops$ml.aget_bien_typegroupe(a.id_affaire) ORDER BY 1"
+}
+,
+{
+  "id": 33,
+  "titre": "Montant moyen des crédits détaillé par type de bien",
+  "description": "Calcule le montant moyen des crédits accordés par type de bien, en affichant pour chaque catégorie : le montant total financé, le nombre d’affaires, le montant moyen par affaire, et la part relative de ce montant moyen dans l’ensemble des crédits.",
+  "categorie": "Analyse financière / Crédits",
+  "tables": {
+    "AFFAIRE": "Dossiers clients et informations financières",
+    "DETARRLOY": "Détails des mises en force (MEF) par affaire",
+    "TIERS": "Informations clients"
+  },
+  "colonnes": {
+    "TYPE_BIEN": {
+      "description": "Type de bien financé (voiture, machine, immeuble, etc.)",
+      "alias_sql": "TYPE_BIEN",
+      "reference": "ops$ml.aget_bien_typegroupe(a.id_affaire)",
+      "filtrable": true
+    },
+    "MONTANT_TOTAL": {
+      "description": "Montant total des crédits pour ce type de bien",
+      "alias_sql": "MONTANT_TOTAL",
+      "reference": "SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0))",
+      "filtrable": true
+    },
+    "NB_AFFAIRES": {
+      "description": "Nombre d’affaires concernées",
+      "alias_sql": "NB_AFFAIRES",
+      "reference": "COUNT(DISTINCT a.ie_affaire)",
+      "filtrable": true
+    },
+    "MONTANT_MOYEN": {
+      "description": "Montant moyen par affaire",
+      "alias_sql": "MONTANT_MOYEN",
+      "reference": "SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0)) / COUNT(DISTINCT a.ie_affaire)",
+      "filtrable": true
+    },
+    "POIDS_RELATIF": {
+      "description": "Part relative du montant moyen dans l’ensemble des crédits",
+      "alias_sql": "POIDS_RELATIF",
+      "reference": "RATIO_TO_REPORT(SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0)) / COUNT(DISTINCT a.ie_affaire)) OVER() * SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0)) / COUNT(DISTINCT a.ie_affaire)",
+      "filtrable": true
+    }
+  },
+  "parametres": {},
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quel est le montant moyen des crédits pour les voitures ?",
+    "Comparer le montant moyen des crédits entre différents types de biens",
+    "Quel type de bien a le plus grand poids relatif dans l’ensemble des crédits ?"
+  ],
+  "filtres_possibles": [
+    "TYPE_BIEN",
+    "MONTANT_MOYEN > X",
+    "POIDS_RELATIF > Y"
+  ],
+  "requete_sql": "SELECT ops$ml.aget_bien_typegroupe(a.id_affaire) TYPE_BIEN, SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0)) MONTANT_TOTAL, COUNT(DISTINCT a.ie_affaire) NB_AFFAIRES, SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0)) / COUNT(DISTINCT a.ie_affaire) MONTANT_MOYEN, RATIO_TO_REPORT(SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0)) / COUNT(DISTINCT a.ie_affaire)) OVER() * SUM(NVL((vib + ecart_bl_cou) * code_sens_ni, 0)) / COUNT(DISTINCT a.ie_affaire) POIDS_RELATIF FROM affaire a, detarrloy d, tiers t WHERE a.id_affaire = d.id_affaire AND d.code_type_dossier = 'MELO' AND a.tiers_client = t.tiers GROUP BY ops$ml.aget_bien_typegroupe(a.id_affaire) ORDER BY 1"
+}
+,
+{
+  "id": 34,
+  "titre": "État des règlements fournisseur",
+  "description": "Liste détaillée des paiements fournisseurs validés et non rejetés, incluant le fournisseur, le type de règlement, le numéro de chèque ou virement, la date d'échéance et le montant payé.",
+  "categorie": "Finance / Fournisseurs",
+  "tables": {
+    "REG": "Règlements fournisseurs et imputations",
+    "ACODIFS": "Codes et types de règlements",
+    "TIERS": "Informations sur les fournisseurs",
+    "REGMVTNEW": "Mouvements liés aux règlements",
+    "AFFAIRE": "Dossiers clients liés aux règlements"
+  },
+  "colonnes": {
+    "FOURNISSEUR": {
+      "description": "Code du fournisseur",
+      "alias_sql": "FOURNISSEUR",
+      "reference": "NVL(reg.tiers_reglement, reg.tiers_impute)",
+      "filtrable": true
+    },
+    "NOM_FOURNISSEUR": {
+      "description": "Nom ou raison sociale du fournisseur",
+      "alias_sql": "NOM_FOURNISSEUR",
+      "reference": "t.nomaff_tiers",
+      "filtrable": true
+    },
+    "ID_REGLEMENT": {
+      "description": "Identifiant du règlement",
+      "alias_sql": "ID_REGLEMENT",
+      "reference": "reg.id_reg",
+      "filtrable": true
+    },
+    "ID_BORDEREAU": {
+      "description": "Identifiant du bordereau de paiement",
+      "alias_sql": "ID_BORDEREAU",
+      "reference": "reg.id_bord",
+      "filtrable": true
+    },
+    "TYPE_REGLEMENT": {
+      "description": "Type de règlement (chèque, virement, etc.)",
+      "alias_sql": "TYPE_REGLEMENT",
+      "reference": "m.code",
+      "filtrable": true
+    },
+    "NO_CHEQUE": {
+      "description": "Numéro de chèque ou référence de virement",
+      "alias_sql": "NO_CHEQUE",
+      "reference": "reg.no_cheque",
+      "filtrable": true
+    },
+    "DATE_ECHEANCE": {
+      "description": "Date d'échéance du paiement",
+      "alias_sql": "DATE_ECHEANCE",
+      "reference": "to_date(reg.date_echeance,'J')",
+      "filtrable": true
+    },
+    "MONTANT_PAYE": {
+      "description": "Montant TTC payé",
+      "alias_sql": "MONTANT_PAYE",
+      "reference": "rm.mt_ttc",
+      "filtrable": true
+    }
+  },
+  "parametres": {},
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quels paiements fournisseurs ont été effectués ce mois-ci ?",
+    "Quel montant a été payé à chaque fournisseur pour les règlements validés ?",
+    "Lister tous les chèques fournisseurs non rejetés avec leur date d'échéance"
+  ],
+  "filtres_possibles": [
+    "FOURNISSEUR",
+    "DATE_ECHEANCE",
+    "MONTANT_PAYE > X",
+    "TYPE_REGLEMENT"
+  ],
+  "requete_sql": "SELECT NVL(reg.tiers_reglement, reg.tiers_impute) FOURNISSEUR, t.nomaff_tiers NOM_FOURNISSEUR, reg.id_reg ID_REGLEMENT, reg.id_bord ID_BORDEREAU, m.code TYPE_REGLEMENT, reg.no_cheque NO_CHEQUE, to_date(reg.date_echeance,'J') DATE_ECHEANCE, rm.mt_ttc MONTANT_PAYE FROM reg, acodifs m, tiers t, regmvtnew rm, affaire a WHERE reg.code_reglement = m.cod_interne AND m.typ_code = 'REGL' AND m.code_statut = 2 AND reg.code_operation = 'DECA' AND reg.code_etat_support = 'SUVA' AND reg.code_etat_imputation = 'VALG' AND reg.id_reg_rejete IS NULL AND reg.id_rejet IS NULL AND NOT EXISTS (SELECT 1 FROM lotreg l where l.id_lotreg = reg.id_lotreg AND l.code_statut = 4) AND NVL(reg.tiers_reglement, reg.tiers_impute) = t.tiers AND rm.id_reg = reg.id_reg AND rm.id_affaire = a.id_affaire AND rm.code_operation_impute = 'FFAP' ORDER BY 7, 1, 3"
+}
+,
+{
+  "id": 35,
+  "titre": "État des règlements 2",
+  "description": "Liste tous les règlements validés pour chaque affaire et client, avec leurs montants HT et TTC ajustés et informations principales. Permet le suivi des paiements et l'analyse par affaire et client.",
+  "categorie": "Finance / Règlements",
+  "tables": {
+    "REGMVTNEW": "Mouvements liés aux règlements",
+    "AFFAIRE": "Dossiers clients et informations des affaires"
+  },
+  "colonnes": {
+    "TIERS_CLIENT": {
+      "description": "Code du client",
+      "alias_sql": "TIERS_CLIENT",
+      "reference": "a.tiers_client",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant de l'affaire",
+      "alias_sql": "IE_AFFAIRE",
+      "reference": "a.ie_affaire",
+      "filtrable": true
+    },
+    "LIBELLE_AFFAIRE": {
+      "description": "Libellé de l'affaire",
+      "alias_sql": "LIBELLE_AFFAIRE",
+      "reference": "a.libelle",
+      "filtrable": true
+    },
+    "CODE_STATUT": {
+      "description": "Statut de l'affaire",
+      "alias_sql": "CODE_STATUT",
+      "reference": "a.code_statut",
+      "filtrable": true
+    },
+    "ID_REGLEMENT": {
+      "description": "Identifiant du règlement",
+      "alias_sql": "ID_REGLEMENT",
+      "reference": "rm.id_reg",
+      "filtrable": true
+    },
+    "DATE_COMPTABLE": {
+      "description": "Date comptable du règlement",
+      "alias_sql": "DATE_COMPTABLE",
+      "reference": "to_date(rm.date_comptable, 'j')",
+      "filtrable": true
+    },
+    "MONTANT_HT": {
+      "description": "Montant hors taxes ajusté du règlement",
+      "alias_sql": "MONTANT_HT",
+      "reference": "rm.mt_ht * rm.code_sens_ni",
+      "filtrable": true
+    },
+    "MONTANT_TTC": {
+      "description": "Montant TTC ajusté du règlement",
+      "alias_sql": "MONTANT_TTC",
+      "reference": "rm.mt_ttc * rm.code_sens_ni",
+      "filtrable": true
+    },
+    "LIBELLE_REGLEMENT": {
+      "description": "Libellé du règlement",
+      "alias_sql": "LIBELLE_REGLEMENT",
+      "reference": "rm.libelle",
+      "filtrable": true
+    },
+    "CHAMPS_SUPP_1": {
+      "description": "Non utilisé / null",
+      "alias_sql": "CHAMPS_SUPP_1",
+      "reference": "null",
+      "filtrable": false
+    },
+    "CHAMPS_SUPP_2": {
+      "description": "Non utilisé / null",
+      "alias_sql": "CHAMPS_SUPP_2",
+      "reference": "null",
+      "filtrable": false
+    },
+    "CHAMPS_SUPP_3": {
+      "description": "Non utilisé / null",
+      "alias_sql": "CHAMPS_SUPP_3",
+      "reference": "null",
+      "filtrable": false
+    },
+    "CHAMPS_SUPP_4": {
+      "description": "Non utilisé / null",
+      "alias_sql": "CHAMPS_SUPP_4",
+      "reference": "null",
+      "filtrable": false
+    }
+  },
+  "parametres": {},
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quels règlements validés ont été enregistrés pour chaque client ?",
+    "Quel est le montant TTC et HT payé par client et par affaire ?",
+    "Lister tous les règlements validés d'une période donnée"
+  ],
+  "filtres_possibles": [
+    "TIERS_CLIENT",
+    "IE_AFFAIRE",
+    "DATE_COMPTABLE",
+    "MONTANT_HT > X",
+    "MONTANT_TTC > X"
+  ],
+  "requete_sql": "SELECT a.tiers_client TIERS_CLIENT, a.ie_affaire IE_AFFAIRE, a.libelle LIBELLE_AFFAIRE, a.code_statut CODE_STATUT, rm.id_reg ID_REGLEMENT, to_date(rm.date_comptable, 'j') DATE_COMPTABLE, rm.mt_ht * rm.code_sens_ni MONTANT_HT, rm.mt_ttc * rm.code_sens_ni MONTANT_TTC, rm.libelle LIBELLE_REGLEMENT, null CHAMPS_SUPP_1, null CHAMPS_SUPP_2, null CHAMPS_SUPP_3, null CHAMPS_SUPP_4 FROM regmvtnew rm, affaire a WHERE rm.id_affaire = a.id_affaire AND rm.code_statut = 2 ORDER BY a.tiers_client, a.ie_affaire, rm.date_comptable, rm.id_reg"
+}
+,
+{
+  "id": 36,
+  "titre": "État des Intérêts crédit-bail par mois",
+  "description": "Calcule pour chaque date d’échéance le total des loyers, crédits et intérêts générés par les contrats de crédit-bail actifs, ainsi que la marge et le nombre d’échéances.",
+  "categorie": "Finance / Crédit-bail",
+  "tables": {
+    "TABECH": "Table des échéances des contrats",
+    "AFFAIRE": "Dossiers clients et informations des affaires"
+  },
+  "colonnes": {
+    "DATE_ECHEANCE": {
+      "description": "Date de l'échéance",
+      "alias_sql": "DATE_ECHEANCE",
+      "reference": "to_date(e.date_echeance, 'J')",
+      "filtrable": true
+    },
+    "TOTAL_LOYER": {
+      "description": "Somme des crédits et intérêts (CRB + INTERET)",
+      "alias_sql": "TOTAL_LOYER",
+      "reference": "SUM(e.crb + e.interet)",
+      "filtrable": true
+    },
+    "TOTAL_CREDITS": {
+      "description": "Somme des crédits CRB",
+      "alias_sql": "TOTAL_CREDITS",
+      "reference": "SUM(e.crb)",
+      "filtrable": true
+    },
+    "TOTAL_CREDIT_BAIL": {
+      "description": "Somme des CRB",
+      "alias_sql": "TOTAL_CREDIT_BAIL",
+      "reference": "SUM(e.crb)",
+      "filtrable": true
+    },
+    "MARGE_INTERETS": {
+      "description": "Somme des intérêts pour les CRB positifs",
+      "alias_sql": "MARGE_INTERETS",
+      "reference": "SUM(CASE WHEN e.crb > 0 THEN e.interet ELSE 0 END)",
+      "filtrable": true
+    },
+    "NB_ECHEANCES": {
+      "description": "Nombre d’échéances pour cette date",
+      "alias_sql": "NB_ECHEANCES",
+      "reference": "COUNT(*)",
+      "filtrable": true
+    }
+  },
+  "parametres": {},
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quel est le total des loyers et intérêts pour chaque date d’échéance ?",
+    "Quelle est la marge générée par les contrats de crédit-bail actifs par mois ?",
+    "Combien d’échéances sont prévues par date pour le crédit-bail ?"
+  ],
+  "filtres_possibles": [
+    "DATE_ECHEANCE",
+    "TOTAL_LOYER > X",
+    "TOTAL_CREDITS > X",
+    "MARGE_INTERETS > X"
+  ],
+  "requete_sql": "SELECT to_date(e.date_echeance, 'J') DATE_ECHEANCE, SUM(e.crb + e.interet) TOTAL_LOYER, SUM(e.crb) TOTAL_CREDITS, SUM(e.crb) TOTAL_CREDIT_BAIL, SUM(CASE WHEN e.crb > 0 THEN e.interet ELSE 0 END) MARGE_INTERETS, COUNT(*) NB_ECHEANCES FROM tabech e, affaire a WHERE e.id_affaire = a.id_affaire AND a.code_statut_impose IN ('AMEL', 'AFIN') AND e.code_statut = 'EXPL' AND e.no_echeance <> 0 GROUP BY e.date_echeance ORDER BY e.date_echeance"
+}
+,
+{
+  "id": 37,
+  "titre": "État des clients défaillants dès la MEF",
+  "description": "Génère un tableau des clients défaillants dès la MEF avec informations sur l’affaire, le client, montants financiers, et indicateurs d’impayés. Utile pour le suivi des risques et le recouvrement dans le crédit-bail.",
+  "categorie": "Finance / Crédit-bail / Risque client",
+  "tables": {
+    "AFFAIRE": "Dossiers clients et informations des affaires"
+  },
+  "colonnes": {
+    "TIERS_CLIENT": {
+      "description": "Code du client",
+      "alias_sql": "TIERS_CLIENT",
+      "reference": "a.tiers_client",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Identifiant de l’affaire",
+      "alias_sql": "IE_AFFAIRE",
+      "reference": "a.ie_affaire",
+      "filtrable": true
+    },
+    "LIBELLE": {
+      "description": "Libellé de l’affaire",
+      "alias_sql": "LIBELLE",
+      "reference": "a.libelle",
+      "filtrable": true
+    },
+    "CODE_STATUT": {
+      "description": "Statut de l’affaire",
+      "alias_sql": "CODE_STATUT",
+      "reference": "a.code_statut",
+      "filtrable": true
+    },
+    "DT_MEF": {
+      "description": "Date de la mise en force (MEF)",
+      "alias_sql": "DT_MEF",
+      "reference": "to_date(a.date_mel, 'j')",
+      "filtrable": true
+    },
+    "NB_MOIS_FACTURES": {
+      "description": "Nombre de mois de loyers facturés",
+      "alias_sql": "NB_MOIS_FACTURES",
+      "reference": "ops$ml.Aget_Nbfactureloyer(a.id_affaire)",
+      "filtrable": true
+    },
+    "NB_MOIS_IMPAYES": {
+      "description": "Nombre de mois impayés",
+      "alias_sql": "NB_MOIS_IMPAYES",
+      "reference": "ops$ml.Aget_Nbloyerimpaye(a.id_affaire)",
+      "filtrable": true
+    },
+    "TAUX_IMPAYES": {
+      "description": "Taux d’impayés (Nb mois impayés / Nb mois facturés -1)",
+      "alias_sql": "TAUX_IMPAYES",
+      "reference": "CASE WHEN ops$ml.Aget_Nbfactureloyer(a.id_affaire) > 1 THEN ops$ml.Aget_Nbloyerimpaye(a.id_affaire) / (ops$ml.Aget_Nbfactureloyer(a.id_affaire) - 1) ELSE 1 END",
+      "filtrable": true
+    },
+    "ENCOURS": {
+      "description": "Montant total des encours",
+      "alias_sql": "ENCOURS",
+      "reference": "ops$ml.aget_encours(a.id_affaire)",
+      "filtrable": true
+    },
+    "LOYERS_IMPAYES": {
+      "description": "Montant des loyers impayés",
+      "alias_sql": "LOYERS_IMPAYES",
+      "reference": "ops$ml.aget_soldeloyer(a.id_affaire)",
+      "filtrable": true
+    },
+    "RISQUE_TOTAL": {
+      "description": "Encours + Loyers impayés",
+      "alias_sql": "RISQUE_TOTAL",
+      "reference": "ops$ml.aget_encours(a.id_affaire) + ops$ml.aget_soldeloyer(a.id_affaire)",
+      "filtrable": true
+    },
+    "VILLE": {
+      "description": "Ville du client",
+      "alias_sql": "VILLE",
+      "reference": "ops$ml.tget_ville(a.tiers_client)",
+      "filtrable": true
+    },
+    "RECOUVREUR": {
+      "description": "Nom du recouvreur assigné",
+      "alias_sql": "RECOUVREUR",
+      "reference": "ops$ml.tget_recouvreur(a.tiers_client)",
+      "filtrable": true
+    },
+    "COMMERCIAL": {
+      "description": "Nom du commercial responsable",
+      "alias_sql": "COMMERCIAL",
+      "reference": "ops$ml.tget_commercial(a.tiers_client)",
+      "filtrable": true
+    }
+  },
+  "parametres": {},
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quels clients ont des loyers impayés dès la MEF ?",
+    "Quel est le risque total par client défaillant ?",
+    "Quels clients ont le taux d’impayés le plus élevé ?"
+  ],
+  "filtres_possibles": [
+    "VILLE",
+    "COMMERCIAL",
+    "NB_MOIS_IMPAYES > X",
+    "TAUX_IMPAYES > Y"
+  ],
+  "requete_sql": "SELECT NULL TIERS_CLIENT_NULL, a.tiers_client TIERS_CLIENT, a.ie_affaire IE_AFFAIRE, a.libelle LIBELLE, a.code_statut CODE_STATUT, to_date(a.date_mel, 'j') DT_MEF, ops$ml.Aget_Nbfactureloyer(a.id_affaire) NB_MOIS_FACTURES, ops$ml.Aget_Nbloyerimpaye(a.id_affaire) NB_MOIS_IMPAYES, CASE WHEN ops$ml.Aget_Nbfactureloyer(a.id_affaire) > 1 THEN ops$ml.Aget_Nbloyerimpaye(a.id_affaire) / (ops$ml.Aget_Nbfactureloyer(a.id_affaire) - 1) ELSE 1 END TAUX_IMPAYES, ops$ml.aget_encours(a.id_affaire) ENCOURS, ops$ml.aget_soldeloyer(a.id_affaire) LOYERS_IMPAYES, ops$ml.aget_encours(a.id_affaire) + ops$ml.aget_soldeloyer(a.id_affaire) RISQUE_TOTAL, ops$ml.tget_ville(a.tiers_client) VILLE, ops$ml.tget_recouvreur(a.tiers_client) RECOUVREUR, ops$ml.tget_commercial(a.tiers_client) COMMERCIAL FROM affaire a WHERE ops$ml.Aget_Nbloyerimpaye(a.id_affaire) > 0 ORDER BY 9 DESC, 8 DESC"
+}
+,
+{
+  "id": 38,
+  "titre": "TEG moyen de MEF",
+  "description": "Calcul du Taux Effectif Global (TEG) moyen des affaires mises en financement (MEF), pondéré par le montant du financement. Permet d’analyser le coût moyen du crédit et la répartition des taux parmi les clients.",
+  "categorie": "Finance / Crédit-bail / Analyse TEG",
+  "tables": {
+    "AFFAIRE": "Dossiers clients et informations financières des affaires"
+  },
+  "colonnes": {
+    "TEG_ARRONDI": {
+      "description": "TEG de l’affaire arrondi à 2 décimales",
+      "alias_sql": "TEG_ARRONDI",
+      "reference": "ROUND(ops$ml.aget_teg(a.id_affaire), 2)",
+      "filtrable": true
+    },
+    "MONTANT_FINANCEMENT": {
+      "description": "Montant total du financement correspondant à la tranche de TEG",
+      "alias_sql": "MONTANT_FINANCEMENT",
+      "reference": "SUM(ops$ml.aget_financement(a.id_affaire))",
+      "filtrable": true
+    },
+    "PART_RELATIVE": {
+      "description": "Part de cette tranche de financement dans le total",
+      "alias_sql": "PART_RELATIVE",
+      "reference": "RATIO_TO_REPORT(SUM(ops$ml.aget_financement(a.id_affaire))) OVER()",
+      "filtrable": true
+    },
+    "TEG_PONDERE": {
+      "description": "TEG pondéré par la part relative du financement, pour calculer le TEG moyen global",
+      "alias_sql": "TEG_PONDERE",
+      "reference": "ROUND(ops$ml.aget_teg(a.id_affaire), 2) * RATIO_TO_REPORT(SUM(ops$ml.aget_financement(a.id_affaire))) OVER()",
+      "filtrable": true
+    }
+  },
+  "parametres": {},
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quel est le TEG moyen des financements accordés ?",
+    "Quelle est la distribution des TEG parmi les clients ?",
+    "Quelle tranche de TEG représente la plus grande part du portefeuille ?"
+  ],
+  "filtres_possibles": [
+    "TEG_ARRONDI",
+    "MONTANT_FINANCEMENT > X",
+    "DATE_MEF"
+  ],
+  "requete_sql": "SELECT ROUND(ops$ml.aget_teg(a.id_affaire), 2) TEG_ARRONDI, SUM(ops$ml.aget_financement(a.id_affaire)) MONTANT_FINANCEMENT, RATIO_TO_REPORT(SUM(ops$ml.aget_financement(a.id_affaire))) OVER() PART_RELATIVE, ROUND(ops$ml.aget_teg(a.id_affaire), 2) * RATIO_TO_REPORT(SUM(ops$ml.aget_financement(a.id_affaire))) OVER() TEG_PONDERE FROM affaire a WHERE a.code_statut_impose IN ('AMEL', 'AFIN') GROUP BY ROUND(ops$ml.aget_teg(a.id_affaire), 2) ORDER BY 1"
+}
+,
+{
+  "id": 39,
+  "titre": "Suivi de l'activité commerciale",
+  "description": "Tableau de suivi commercial par agence et commercial, incluant les montants approuvés, commandés, totaux sur l'année et déjà mis en financement (MEF). Permet d’analyser la performance commerciale.",
+  "categorie": "Commercial / Analyse performance",
+  "tables": {
+    "AFFAIRE": "Dossiers clients et informations financières des affaires",
+    "TIERS": "Informations sur les clients et commerciaux"
+  },
+  "colonnes": {
+    "AGENCE_COMMERCIAL": {
+      "description": "Nom de l'agence et, pour Tunis, nom du commercial associé",
+      "alias_sql": "AGENCE_COMMERCIAL",
+      "reference": "ops$ml.tget_agenceml(a.tiers_client) || CASE WHEN ops$ml.tget_agenceml(a.tiers_client) = 'Tunis' THEN ' / ' || ops$ml.tget_commercial(a.tiers_client) ELSE '' END",
+      "filtrable": true
+    },
+    "MT_APPROBATION": {
+      "description": "Montant total approuvé pour l’agence/commercial",
+      "alias_sql": "MT_APPROBATION",
+      "reference": "SUM(CASE WHEN a.code_statut IN ('A020', 'A021', 'A022', 'A023', 'A120') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)",
+      "filtrable": true
+    },
+    "MT_COMMANDE": {
+      "description": "Montant total des commandes validées",
+      "alias_sql": "MT_COMMANDE",
+      "reference": "SUM(CASE WHEN a.code_statut_impose = 'AACC' THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)",
+      "filtrable": true
+    },
+    "MT_TOTAL_APPROBATION": {
+      "description": "Montant total d’approbation sur l’année pour cette agence/commercial",
+      "alias_sql": "MT_TOTAL_APPROBATION",
+      "reference": "SUM(CASE WHEN a.date_creation >= to_char(TRUNC(to_date('31/07/2025', 'dd/mm/yyyy'), 'YEAR'), 'j') AND a.date_creation < to_char(to_date('31/07/2025', 'dd/mm/yyyy'), 'j') AND (a.code_statut IN ('A020', 'A021', 'A022', 'A023', 'A120') OR a.code_statut_impose IN ('AACC', 'AMEL', 'AFIN')) THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)",
+      "filtrable": true
+    },
+    "MT_MEF": {
+      "description": "Montant total déjà mis en financement (MEF)",
+      "alias_sql": "MT_MEF",
+      "reference": "SUM(CASE WHEN a.code_statut_impose IN ('AMEL', 'AFIN') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END)",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "DATE_REF": "Date de référence pour le calcul annuel (ici 31/07/2025)"
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quel est le montant approuvé par chaque agence et commercial cette année ?",
+    "Combien a déjà été mis en financement (MEF) par commercial ?",
+    "Quelle est la part des commandes par rapport aux montants approuvés ?"
+  ],
+  "filtres_possibles": [
+    "AGENCE_COMMERCIAL",
+    "MT_APPROBATION > X",
+    "MT_COMMANDE > X",
+    "MT_TOTAL_APPROBATION > X",
+    "MT_MEF > X"
+  ],
+  "requete_sql": "SELECT NULL, ops$ml.tget_agenceml(a.tiers_client) || CASE WHEN ops$ml.tget_agenceml(a.tiers_client) = 'Tunis' THEN ' / ' || ops$ml.tget_commercial(a.tiers_client) ELSE '' END AGENCE_COMMERCIAL, SUM(CASE WHEN a.code_statut IN ('A020', 'A021', 'A022', 'A023', 'A120') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END) MT_APPROBATION, SUM(CASE WHEN a.code_statut_impose = 'AACC' THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END) MT_COMMANDE, SUM(CASE WHEN a.date_creation >= to_char(TRUNC(to_date('31/07/2025', 'dd/mm/yyyy'), 'YEAR'), 'j') AND a.date_creation < to_char(to_date('31/07/2025', 'dd/mm/yyyy'), 'j') AND (a.code_statut IN ('A020', 'A021', 'A022', 'A023', 'A120') OR a.code_statut_impose IN ('AACC', 'AMEL', 'AFIN')) THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END) MT_TOTAL_APPROBATION, SUM(CASE WHEN a.code_statut_impose IN ('AMEL', 'AFIN') THEN ops$ml.aget_financement(a.id_affaire) ELSE 0 END) MT_MEF FROM affaire a WHERE (a.date_mel IS NULL OR a.date_mel >= to_char(TRUNC(to_date('31/07/2025', 'dd/mm/yyyy'), 'YEAR'), 'j') AND a.date_mel < to_char(to_date('31/07/2025', 'dd/mm/yyyy'), 'j')) GROUP BY ops$ml.tget_agenceml(a.tiers_client), CASE WHEN ops$ml.tget_agenceml(a.tiers_client) = 'Tunis' THEN ' / ' || ops$ml.tget_commercial(a.tiers_client) ELSE '' END ORDER BY 2"
+}
+,
+{
+  "id": 40,
+  "titre": "Suivi de l'activité commerciale (Rentabilité)",
+  "description": "Tableau de suivi commercial axé sur la rentabilité par agence et commercial, incluant montants financés (MEF), TEG moyen, marge générée, impayés et ratio pondéré du TEG. Permet d’évaluer la performance et rentabilité des agences et commerciaux.",
+  "categorie": "Commercial / Rentabilité",
+  "tables": {
+    "AFFAIRE": "Dossiers clients et informations financières des affaires",
+    "TIERS": "Informations sur les clients et commerciaux"
+  },
+  "colonnes": {
+    "AGENCE_COMMERCIAL": {
+      "description": "Nom de l'agence et, pour Tunis, nom du commercial associé",
+      "alias_sql": "AGENCE_COMMERCIAL",
+      "reference": "ops$ml.tget_agenceml(a.tiers_client) || CASE WHEN ops$ml.tget_agenceml(a.tiers_client) = 'Tunis' THEN ' / ' || ops$ml.tget_commercial(a.tiers_client) ELSE '' END",
+      "filtrable": true
+    },
+    "MT_MEF": {
+      "description": "Montant total déjà mis en financement (MEF)",
+      "alias_sql": "MT_MEF",
+      "reference": "SUM(ops$ml.aget_financement(a.id_affaire))",
+      "filtrable": true
+    },
+    "TEG": {
+      "description": "Taux Effectif Global moyen pondéré par le montant financé",
+      "alias_sql": "TEG",
+      "reference": "SUM(ops$ml.aget_teg(a.id_affaire)*ops$ml.aget_financement(a.id_affaire))/SUM(ops$ml.aget_financement(a.id_affaire))",
+      "filtrable": true
+    },
+    "MT_MARGE": {
+      "description": "Marge générée sur les financements",
+      "alias_sql": "MT_MARGE",
+      "reference": "SUM(ops$ml.aget_marge(a.id_affaire))",
+      "filtrable": true
+    },
+    "MT_IMPAYES": {
+      "description": "Montant total des impayés",
+      "alias_sql": "MT_IMPAYES",
+      "reference": "SUM(ops$ml.aget_soldecmtb(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy')))",
+      "filtrable": true
+    },
+    "RATIO_TEG": {
+      "description": "Ratio pondéré du TEG par rapport au financement total",
+      "alias_sql": "RATIO_TEG",
+      "reference": "SUM(ops$ml.aget_teg(a.id_affaire)*ops$ml.aget_financement(a.id_affaire))/SUM(ops$ml.aget_financement(a.id_affaire)) * RATIO_TO_REPORT(SUM(ops$ml.aget_financement(a.id_affaire))) OVER()",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "DATE_REF": "Date de référence pour le calcul des impayés et du TEG (ici 31/07/2025)"
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quelle est la rentabilité moyenne des agences et commerciaux ?",
+    "Quelles agences ont beaucoup de financements mais faible TEG ou marge ?",
+    "Quel est le montant total des impayés par agence/commercial ?"
+  ],
+  "filtres_possibles": [
+    "AGENCE_COMMERCIAL",
+    "MT_MEF > X",
+    "TEG > X",
+    "MT_MARGE > X",
+    "MT_IMPAYES > X",
+    "RATIO_TEG > X"
+  ],
+  "requete_sql": "SELECT NULL, ops$ml.tget_agenceml(a.tiers_client) || CASE WHEN ops$ml.tget_agenceml(a.tiers_client) = 'Tunis' THEN ' / ' || ops$ml.tget_commercial(a.tiers_client) ELSE '' END AGENCE_COMMERCIAL, SUM(ops$ml.aget_financement(a.id_affaire)) MT_MEF, SUM(ops$ml.aget_teg(a.id_affaire)*ops$ml.aget_financement(a.id_affaire))/SUM(ops$ml.aget_financement(a.id_affaire)) TEG, SUM(ops$ml.aget_marge(a.id_affaire)) MT_MARGE, SUM(ops$ml.aget_soldecmtb(a.id_affaire, to_date('31/07/2025', 'dd/mm/yyyy'))) MT_IMPAYES, SUM(ops$ml.aget_teg(a.id_affaire)*ops$ml.aget_financement(a.id_affaire))/SUM(ops$ml.aget_financement(a.id_affaire)) * RATIO_TO_REPORT(SUM(ops$ml.aget_financement(a.id_affaire))) OVER() RATIO_TEG FROM affaire a GROUP BY ops$ml.tget_agenceml(a.tiers_client), CASE WHEN ops$ml.tget_agenceml(a.tiers_client) = 'Tunis' THEN ' / ' || ops$ml.tget_commercial(a.tiers_client) ELSE '' END ORDER BY 2"
+}
+,
+{
+  "id": 41,
+  "titre": "Suivi détaillé des affaires (Commercial / Fournisseur)",
+  "description": "Tableau détaillé des affaires avec informations financières et commerciales, incluant le commercial et le fournisseur liés à chaque affaire. Permet de suivre chaque dossier individuellement et d’identifier les montants, taux, TEG et date du dernier changement de statut.",
+  "categorie": "Commercial / Suivi affaires",
+  "tables": {
+    "AFFAIRE": "Données des dossiers clients et informations financières",
+    "HISTOSTAT": "Historique des statuts des affaires"
+  },
+  "colonnes": {
+    "TIERS_CLIENT": {
+      "description": "Code du client",
+      "alias_sql": "TIERS_CLIENT",
+      "reference": "a.tiers_client",
+      "filtrable": true
+    },
+    "IE_AFFAIRE": {
+      "description": "Numéro de l’affaire",
+      "alias_sql": "IE_AFFAIRE",
+      "reference": "a.ie_affaire",
+      "filtrable": true
+    },
+    "LIBELLE": {
+      "description": "Libellé de l’affaire",
+      "alias_sql": "LIBELLE",
+      "reference": "a.libelle",
+      "filtrable": true
+    },
+    "CODE_STATUT": {
+      "description": "Statut actuel de l’affaire",
+      "alias_sql": "CODE_STATUT",
+      "reference": "a.code_statut",
+      "filtrable": true
+    },
+    "DTSTATUT": {
+      "description": "Date du dernier changement de statut",
+      "alias_sql": "DTSTATUT",
+      "reference": "to_date(MAX(h.date_statut), 'j')",
+      "filtrable": true
+    },
+    "OBJET": {
+      "description": "Désignation du bien financé",
+      "alias_sql": "OBJET",
+      "reference": "ops$ml.aget_bien_libelle(a.id_affaire)",
+      "filtrable": true
+    },
+    "TAUX": {
+      "description": "Taux appliqué au financement",
+      "alias_sql": "TAUX",
+      "reference": "ops$ml.aget_taux(a.id_affaire)",
+      "filtrable": true
+    },
+    "TEG": {
+      "description": "Taux Effectif Global de l’affaire",
+      "alias_sql": "TEG",
+      "reference": "ops$ml.aget_teg(a.id_affaire)",
+      "filtrable": true
+    },
+    "MT_HT": {
+      "description": "Montant financé hors taxes",
+      "alias_sql": "MT_HT",
+      "reference": "ops$ml.aget_financement(a.id_affaire)",
+      "filtrable": true
+    },
+    "MT_TTC": {
+      "description": "Montant financé TTC",
+      "alias_sql": "MT_TTC",
+      "reference": "ops$ml.aget_financementttc(a.id_affaire)",
+      "filtrable": true
+    },
+    "COMMERCIAL": {
+      "description": "Nom du commercial associé",
+      "alias_sql": "COMMERCIAL",
+      "reference": "ops$ml.tget_commercial(a.tiers_client)",
+      "filtrable": true
+    },
+    "FOURNISSEUR": {
+      "description": "Nom du fournisseur associé",
+      "alias_sql": "FOURNISSEUR",
+      "reference": "ops$ml.aget_fournisseur_nom(a.id_affaire)",
+      "filtrable": true
+    }
+  },
+  "parametres": {
+    "DATE_REF": "Date de calcul pour le dernier statut (via MAX(h.date_statut))"
+  },
+  "type_resultat": "tableau",
+  "exemples_questions": [
+    "Quels sont les détails financiers et commerciaux de chaque affaire ?",
+    "Quel commercial et fournisseur sont associés à une affaire spécifique ?",
+    "Quel est le TEG et le taux appliqué à chaque dossier ?"
+  ],
+  "filtres_possibles": [
+    "TIERS_CLIENT",
+    "IE_AFFAIRE",
+    "COMMERCIAL",
+    "FOURNISSEUR",
+    "CODE_STATUT"
+  ],
+  "requete_sql": "SELECT DISTINCT NULL, a.tiers_client TIERS_CLIENT, a.ie_affaire IE_AFFAIRE, a.libelle LIBELLE, a.code_statut CODE_STATUT, to_date(MAX(h.date_statut), 'j') DTSTATUT, ops$ml.aget_bien_libelle(a.id_affaire) OBJET, ops$ml.aget_taux(a.id_affaire) TAUX, ops$ml.aget_teg(a.id_affaire) TEG, ops$ml.aget_financement(a.id_affaire) MT_HT, ops$ml.aget_financementttc(a.id_affaire) MT_TTC, ops$ml.tget_commercial(a.tiers_client) COMMERCIAL, ops$ml.aget_fournisseur_nom(a.id_affaire) FOURNISSEUR FROM affaire a, histostat h WHERE h.id_objet = a.id_affaire AND h.code_type_dossier = 'AFF' GROUP BY a.tiers_client, a.ie_affaire, a.libelle, a.code_statut, a.code_categorie_affaire, a.id_affaire ORDER BY a.tiers_client, a.ie_affaire"
+}
+]

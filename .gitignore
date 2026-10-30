@@ -1,0 +1,66 @@
+# Secrets
+.env
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+*.egg-info/
+.eggs/
+dist/
+*.egg
+
+# Django
+*.log
+db.sqlite3
+staticfiles/
+local_settings.py
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Binaries & build artifacts (ne pas pousser sur GitHub)
+*.exe
+*.lnk
+build/
+chatbotBHl/build/
+chatbotBHl/exe/
+chatbotBHl/models/
+*.spec
+
+# Local / machine-specific
+logs/
+*.bat.bat
+Finorix.lnk
+
+# Caches / models téléchargés localement (très lourds)
+.cache/
+*.pt
+*.bin
+*.onnx
+*.gguf
+chatbotBHl/mychatbot/chat/models/
+chatbotBHl/mychatbot/django_cache/
+*.djcache
+*.whl
+chatbotBHl/*.spec
+chatbotBHl/rapports.json
+# (le vrai catalogue est chatbotBHl/mychatbot/chat/rapports.json)
+
+# Jupyter
+.ipynb_checkpoints/
+
+chatbotBHl/mychatbot/djnago_cache
+chatbotBHl/mychatbot/django_cache/

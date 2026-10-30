@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Inscription - MyChatBot</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+<style>
+/* ===== Reset ===== */
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+
+body {
+    height:100vh; display:flex; justify-content:center; align-items:center;
+    background: #0f1f3c; overflow:hidden; position:relative;
+}
+
+/* ===== Animated gradient background ===== */
+body::before {
+    content:""; position:absolute; top:0; left:0; width:100%; height:100%;
+    background: linear-gradient(120deg, #0f1f3c, #173753, #1e3f6b, #2a4b6f);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    z-index:0;
+}
+@keyframes gradient {
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+
+/* ===== Particles ===== */
+#particles-js { position:absolute; width:100%; height:100%; top:0; left:0; z-index:0; }
+
+/* ===== Card ===== */
+.signup-container {
+    position: relative; 
+    z-index: 1;
+    background: rgba(23,55,83,0.95);
+    backdrop-filter: blur(25px) saturate(180%);
+    border-radius: 35px;
+    padding: 100px 50px 60px; /* espace pour logo flottant */
+    box-shadow: 
+        0 20px 50px rgba(0,0,0,0.3),
+        0 0 40px rgba(26,58,91,0.3),
+        inset 0 0 25px rgba(26,58,91,0.35);
+    border: 2px solid rgba(255,255,255,0.25);
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+.signup-container:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 
+        0 40px 80px rgba(0,0,0,0.45),
+        0 0 60px rgba(26,58,91,0.45),
+        inset 0 0 25px rgba(26,58,91,0.35);
+}
+
+/* ===== Logo ===== */
+.chatbot-logo {
+    width: 160px; 
+    height: auto;
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 0 15px #5aa0ff) drop-shadow(0 0 30px #3a84ff);
+    animation: logoFloat 4s ease-in-out infinite;
+}
+@keyframes logoFloat {
+    0% { transform: translate(-50%, 0px) scale(1); }
+    50% { transform: translate(-50%, -6px) scale(1.03); }
+    100% { transform: translate(-50%, 0px) scale(1); }
+}
+
+/* ===== Chatbot Name ===== */
+.chatbot-name {
+    font-family: 'Comic Neue', cursive, sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    color: #74b3ff; 
+    text-shadow: 2px 2px 12px #173753, 0 0 15px #5aa0e0;
+    text-align: center;
+    margin-bottom: 30px;
+    animation: floatText 3s ease-in-out infinite;
+}
+@keyframes floatText {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+/* ===== Title ===== */
+h2 {
+    font-size:30px; 
+    font-weight:800; 
+    background: linear-gradient(90deg, #5aa0e0, #74b3ff, #3a84ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom:50px; 
+    letter-spacing:2px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    position: relative;
+}
+h2::after {
+    content:''; position:absolute;
+    width:0; height:4px;
+    background: linear-gradient(90deg, #5aa0e0, #74b3ff, #3a84ff);
+    left:50%; bottom:-15px; border-radius:3px;
+    transform:translateX(-50%);
+    transition: width 0.5s ease;
+}
+h2:hover::after { width:120px; }
+
+/* ===== Form ===== */
+form { display:flex; flex-direction:column; }
+.form-group { position:relative; margin-bottom:25px; }
+.form-group input {
+    width:100%; padding:18px 20px; font-size:16px; border:none; border-radius:14px;
+    background: rgba(23,55,83,0.75); outline:none; transition: all 0.4s ease; color:#cce0ff;
+    box-shadow: inset 0 4px 12px rgba(0,0,0,0.15);
+}
+.form-group input:focus { 
+    background: rgba(23,55,83,0.98); 
+    box-shadow:0 0 15px rgba(74,179,255,0.7), 0 0 25px rgba(26,58,91,0.6);
+}
+.form-group label {
+    position:absolute; left:20px; top:18px; color:#b0c7e0; font-size:16px;
+    pointer-events:none; transition: all 0.3s ease;
+}
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label {
+    top:-12px; left:16px; font-size:13px; background:rgba(23,55,83,0.95); padding:0 6px; color:#74b3ff; font-weight:600;
+}
+
+/* ===== Button ===== */
+button {
+    padding:18px; 
+    background: linear-gradient(135deg,#3a84ff,#5aa0e0);
+    color:#fff; font-size:16px; font-weight:700; border:none; border-radius:16px;
+    cursor:pointer; transition: all 0.5s ease; box-shadow:0 8px 25px rgba(0,0,0,0.25);
+}
+button:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow:0 14px 30px rgba(0,0,0,0.45);
+    background: linear-gradient(135deg,#5aa0e0,#3a84ff);
+}
+
+/* ===== Messages ===== */
+.messages { margin-bottom:30px; text-align:left; list-style:none; padding:0; }
+.messages li {
+    background: rgba(26,58,91,0.85); border-left:6px solid #3a84ff; color:#cce0ff;
+    padding:16px 18px; margin-bottom:12px; border-radius:12px;
+    font-size:15px; animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn { from{opacity:0; transform:translateX(-20px);} to{opacity:1; transform:translateX(0);} }
+
+/* ===== Signup link ===== */
+.signup-link { margin-top:25px; font-size:15px; color:#a0c4ff; }
+.signup-link a { color:#74b3ff; font-weight:700; text-decoration:none; transition:0.3s ease; }
+.signup-link a:hover { text-decoration:underline; color:#3a84ff; }
+
+/* ===== Responsive ===== */
+@media (max-width:500px){ .signup-container{ padding:120px 30px 40px; } }
+</style>
+</head>
+<body>
+<!-- Particules -->
+<div id="particles-js"></div>
+
+<div class="signup-container">
+    <!-- Logo flottant -->
+    <img src="{% static 'img/5.png' %}" alt="Logo Finorix" class="chatbot-logo">
+    
+    <!-- Nom du chatbot -->
+    <div class="chatbot-name">Finorix</div>
+
+    <h2>Créer un compte</h2>
+
+    {% if messages %}
+        <ul class="messages">
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <input type="text" name="username" placeholder=" " required>
+            <label>Nom d'utilisateur</label>
+        </div>
+        <div class="form-group">
+            <input type="email" name="email" placeholder=" " required>
+            <label>Email</label>
+        </div>
+        <div class="form-group">
+            <input type="password" name="password" placeholder=" " required>
+            <label>Mot de passe</label>
+        </div>
+        <div class="form-group">
+            <input type="password" name="password2" placeholder=" " required>
+            <label>Confirmer le mot de passe</label>
+        </div>
+        <button type="submit">S'inscrire</button>
+    </form>
+
+    <p class="signup-link">Déjà un compte ? <a href="{% url 'login' %}">Connectez-vous</a></p>
+</div>
+
+<!-- ===== Particules JS ===== -->
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script>
+particlesJS("particles-js", {
+  "particles": {
+    "number": {"value":120,"density":{"enable":true,"value_area":800}},
+    "color":{"value":["#173753","#1a3a5b","#2a4b6f","#3a6fa0","#74b3ff"]},
+    "shape":{"type":"circle"},
+    "opacity":{"value":0.7,"random":true},
+    "size":{"value":4,"random":true},
+    "line_linked":{"enable":true,"distance":180,"color":"#74b3ff","opacity":0.4,"width":1.5},
+    "move":{"enable":true,"speed":2.5,"direction":"none","random":true,"straight":false,"out_mode":"out"}
+  },
+  "interactivity": {
+    "detect_on":"canvas",
+    "events":{"onhover":{"enable":true,"mode":"grab"},"onclick":{"enable":true,"mode":"push"}},
+    "modes":{"grab":{"distance":180,"line_linked":{"opacity":0.6}},"push":{"particles_nb":6}}
+  },
+  "retina_detect":true
+});
+</script>
+</body>
+</html>

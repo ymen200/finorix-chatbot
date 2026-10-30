@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Finorix</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .greeting-container {
+    text-align: center;
+    margin-top: 10px; /* Optional: Add some space */
+    font-size: 26px; /* Optional: Make the text stand out */
+    font-weight: 500; /* Optional: Adjust font weight */
+    color: #173753;
+}
+
+        #chartContainer {
+    position: relative; /* Add this line */
+    display: none;
+    width: 100%;
+    max-width: 1630px;
+    height: 700px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 3px 8px rgba(0,0,0,0.15);
+    padding: 10px;
+}
+        .chatbot-logo {
+    height: 200px; /* Ajuste la hauteur du logo */
+    margin-right: 5px; /* Ajoute un espace à droite du logo */
+}
+        /* Styles de base et mise en page générale */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #495057;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* En-tête de la page */
+        .page-header {
+             display: flex;
+            align-items: center;
+            gap: 20px; /* Gère l'espace entre les éléments enfants */
+            background: #173753;
+            color: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            height: 110px; /* Exemple: Définir une hauteur fixe pour le header */
+        }
+        
+        .page-header:hover {
+            transform: translateY(-3px);
+        }
+
+        .header-title {
+            font-size: 26px;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header-title i {
+            font-size: 28px;
+            color: #fff;
+            transition: transform 0.5s ease;
+        }
+
+        .header-title:hover i {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        h1 {
+            color: #173753;
+            border-bottom: 2px solid #ced4da;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Formulaire principal de recherche */
+        .main-form-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #promptInput {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        #promptInput:focus {
+            border-color: #007BFF;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+            outline: none;
+        }
+
+        #promptSelect {
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            background-color: #fff;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        /* Style des boutons */
+        button, .styled-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        button:hover, .styled-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary { background-color: #007BFF; color: #fff; }
+        .btn-primary:hover { background-color: #0056b3; }
+
+        .btn-danger { background-color: #dc3545; color: #fff; }
+        .btn-danger:hover { background-color: #c82333; }
+
+        .btn-secondary { background-color: #6c757d; color: #fff; }
+        .btn-secondary:hover { background-color: #5a6268; }
+
+        .btn-success { background-color: #28a745; color: #fff; }
+        .btn-success:hover { background-color: #218838; }
+
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-warning:hover { background-color: #e0a800; }
+        
+        button:disabled {
+            background-color: #e9ecef;
+            color: #adb5bd;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Conteneurs des contrôles du tableau (Card UI) */
+        .controls-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0;
+            margin-top: 20px;
+            padding: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .controls-container h3 {
+            width: 100%;
+            color: #343a40;
+            font-size: 22px;
+            text-align: center;
+            margin: 0 0 15px 0;
+        }
+
+        .control-block {
+            flex: 1 1 0;
+            min-width: 250px;
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 5px;
+        }
+        
+        .control-block h4 {
+            margin: -20px -20px 20px -20px;
+            padding: 15px 20px;
+            color: #fff;
+            background-color: #495057;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group.full-width {
+            flex-basis: 100%;
+            justify-content: flex-start;
+        }
+
+        #searchInput, #columnSelect, #numOperator, #numValue, #dateOperator, #dateValue, #sortColumn, #sortOrder, #colX, #colY {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Style de la table */
+        .table-container {
+            max-height: 100vh;
+            overflow-y: auto;
+            overflow-x: auto;
+            margin-top: 20px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #e9ecef;
+            padding: 12px;
+            text-align: left;
+            position: relative;
+        }
+
+        th {
+            background-color: #f1f3f5;
+            cursor: pointer;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        tbody tr:nth-child(odd) { background-color: #fff; }
+        tbody tr:nth-child(even) { background-color: #f9f9f9; }
+        tbody tr:hover { background-color: #e9f5ff; }
+
+        /* Styles spécifiques des lignes */
+        .combined-row { background-color: #e2f2e4 !important; font-weight: bold; }
+        .used-in-combination { background-color: #f8f9fa !important; color: #adb5bd; }
+        .important-row { background-color: #fff3cd !important; }
+        .validated-row { background-color: #d4edda !important; }
+        .hidden-row { display: none; }
+        .highlight-col { background-color: #f0faff !important; }
+
+        /* Informations de performance et loader */
+        .timing-box {
+            background: #eef2f8;
+            border: 1px solid #c8d6e6;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .cache-info {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .from-cache { color: #28a745; }
+        .from-exec { color: #fd7e14; }
+        #loader {
+            display: none;
+            font-weight: bold;
+            color: #007BFF;
+            margin-top: 10px;
+        }
+
+        /* Dropdown pour les colonnes */
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content { display: none; position: absolute; background-color: #fff; min-width: 250px; border: 1px solid #ccc; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); padding: 10px; z-index: 3; border-radius: 6px; }
+        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown-content label { display: block; cursor: pointer; margin: 5px 0; }
+        .dropdown-buttons { margin-top: 10px; text-align: right; }
+
+        /* Autres styles de la table et des popups */
+        th .tooltip { visibility: hidden; background-color: #333; color: #fff; text-align: left; padding: 5px; border-radius: 4px; position: absolute; top: 100%; left: 0; white-space: pre-line; z-index: 5; font-size: 12px; }
+        th:hover .tooltip { visibility: visible; }
+        th .sparkline { display: block; width: 100%; height: 20px; margin-top: 2px; }
+
+        .histogram-popup {
+            position: fixed;
+            top: 50px;
+            right: 20px;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 10;
+            border-radius: 8px;
+            width: 600px;
+        }
+        
+        #columnPopup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
+            z-index: 10000;
+            width: 400px;
+            max-width: 90vw;
+            display: none;
+        }
+
+        .stats-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        .stats-table th, .stats-table td {
+            border: 1px solid #ccc;
+            padding: 5px;
+            text-align: center;
+        }
+        .stats-table th { background: #f0f0f0; }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            background-color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .pagination button:hover:not(:disabled) {
+            background-color: #007BFF;
+            color: #fff;
+        }
+        
+        /* Styles pour le nouveau pied de page */
+        footer {
+            background: #173753;
+            color: #fff;
+            padding: 40px 20px 20px;
+            margin-top: 40px;
+        }
+
+        .footer-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: flex-start;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-column {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .footer-column h4 {
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .footer-column p, .footer-column ul {
+            font-size: 14px;
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-column ul li i {
+            color: #007BFF;
+        }
+
+        .footer-column a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover {
+            color: #007BFF;
+        }
+
+        .social-icons {
+            margin-top: 15px;
+        }
+
+        .social-icons a {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border: 1px solid #fff;
+            border-radius: 50%;
+            color: #fff;
+            margin-right: 10px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .social-icons a:hover {
+            background-color: #007BFF;
+            border-color: #007BFF;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="page-header">
+    <div class="header-title">
+  <img src="{% static 'img/5.png' %}" alt="Logo Finorix" class="chatbot-logo">
+    
+    </div>
+        <div>
+            {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="post" style="margin:0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </header>
+<div class="greeting-container">
+    {% if user.is_authenticated %}
+        Bienvenue {{ user.username }}
+    {% endif %}
+</div>
+
+    <h1>Finorix : L’intelligence au service de vos données</h1>
+
+    <form id="chatForm" method="post" class="main-form-container">
+        {% csrf_token %}
+        <input type="text" name="prompt" id="promptInput" placeholder="Posez votre question ici...">
+        <select id="promptSelect">
+            <option value="">-- Ou choisissez un prompt --</option>
+        </select>
+        <button type="submit" class="btn-primary">
+            <i class="fas fa-paper-plane"></i> Envoyer
+        </button>
+    </form>
+
+    <div id="loader">⏳ Recherche en cours...</div>
+    <script>
+        const prompts = [
+            "Etat des affaires par statut avec détails financiers",
+            "Etat de risque par affaire",
+            "Etat des échéances par mois (Détaillé)",
+            "Etat des échéances par mois (Total)",
+            "Durée moyenne des contrats",
+            "Durée restante de l'encours",
+            "Part du premier loyer dans les MEF",
+            "Situation des contrats",
+            "État des affaires par type de bien",
+            "État des affaires par agence bancaire",
+            "État des affaires par apporteur",
+            "État des règlements",
+            "État de retour des impayés",
+            "État des impayés par client",
+            "État des impayés par client 2",
+            "État des impayés et intérêts de retard",
+            "Situation des clients",
+            "Etat des approbations par secteur d'activité (détaillé)",
+            "Etat des approbations par gouvernorat",
+            "Etat des MEF par secteur d'activité (détaillé)",
+            "Etat des MEF par gouvernorat",
+            "Etat des MEF par commercial",
+            "Etat des encours par secteur d’activité",
+            "Etat des encours par type de bien",
+            "Etat des encours par gouvernorat",
+            "Etat de chiffre d’affaire par fournisseur (Global)",
+            "Etat de chiffre d’affaire par fournisseur (Détaillé)",
+            "Etat des risques par secteur d’activité",
+            "Etat des risques par type de bien",
+            "Etat des risques par gouvernorat",
+            "Etat de suivi des agences",
+            "Etat des taux Min et MAX par type de bien",
+            "Montant moyen des crédits détaillé par type de bien",
+            "État des règlements fournisseur",
+            "État des règlements 2",
+            "État des Intérêts crédit-bail par mois",
+            "État des clients défaillants dès la MEF",
+            "TEG moyen de MEF",
+            "Suivi de l'activité commerciale",
+            "Suivi de l'activité commerciale (Rentabilité)",
+            "Suivi détaillé des affaires (Commercial / Fournisseur)",
+            "Rapport des ventes mensuelles",
+            "Analyse du chiffre d'affaires par client",
+            "Liste des fournisseurs actifs",
+            "Top 10 des produits les plus vendus"
+        ];
+
+        const select = document.getElementById('promptSelect');
+        const input = document.getElementById('promptInput');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            prompts.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p;
+                option.textContent = p;
+                select.appendChild(option);
+            });
+        });
+
+        select.addEventListener('change', () => {
+            if(select.value) {
+                input.value = select.value;
+                input.focus();
+            }
+        });
+    </script>
+    {% if response %}
+        <h2>Résultat :</h2>
+        <div class="timing-box">
+            ⏱️ Temps de recherche du report : <b>{{ search_time }} sec</b><br>
+            ⚡ Temps d’exécution du report : <b>{{ execution_time }} sec</b><br>
+            🔥 Temps total : <b>{{ total_time }} sec</b>
+        </div>
+        <div class="cache-info">
+            {% if from_cache %}
+                ✅ <span class="from-cache">Résultat récupéré depuis le cache</span>
+            {% else %}
+                ⚡ <span class="from-exec">Résultat exécuté en temps réel</span>
+            {% endif %}
+        </div>
+        
+        <div class="controls-container">
+            <h3>Contrôles du Tableau</h3>
+
+            <div class="control-block">
+                <h4><i class="fas fa-search"></i> Recherche et Tri</h4>
+                <div class="control-group full-width">
+                    <input type="text" id="searchInput" placeholder="Rechercher...">
+                    <select id="columnSelect">
+                        <option value="">Toutes les colonnes</option>
+                        {% for key in response.0.keys %}
+                            <option value="{{ forloop.counter0 }}">{{ key }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="sortColumn">Trier par : </label>
+                    <select id="sortColumn">
+                        <option value="">Aucun</option>
+                        {% for key in response.0.keys %}
+                            <option value="{{ forloop.counter0 }}">{{ key }}</option>
+                        {% endfor %}
+                    </select>
+                    <select id="sortOrder">
+                        <option value="asc">Ascendant</option>
+                        <option value="desc">Descendant</option>
+                    </select>
+                    <button id="sortButton" class="btn-secondary"><i class="fas fa-sort"></i> Trier</button>
+                    <button id="resetButton" class="btn-warning"><i class="fas fa-sync-alt"></i> Réinitialiser</button>
+                </div>
+            </div>
+            
+            <div class="control-block">
+                <h4><i class="fas fa-filter"></i> Filtres Conditionnels</h4>
+                <div id="numericFilter" class="control-group full-width" style="display:none;">
+                    <label>Filtre numérique :</label>
+                    <select id="numOperator">
+                        <option value=">">&gt;</option>
+                        <option value="<">&lt;</option>
+                        <option value="=">=</option>
+                    </select>
+                    <input type="number" id="numValue" placeholder="Valeur">
+                </div>
+                <div id="dateFilter" class="control-group full-width" style="display:none;">
+                    <label>Filtre date :</label>
+                    <select id="dateOperator">
+                        <option value=">">&gt;</option>
+                        <option value="<">&lt;</option>
+                        <option value="=">=</option>
+                    </select>
+                    <input type="date" id="dateValue">
+                </div>
+            </div>
+
+            <div class="control-block">
+                <h4><i class="fas fa-file-export"></i> Actions et Export</h4>
+                <div class="control-group full-width">
+                    <button id="exportButton" class="btn-success"><i class="fas fa-file-csv"></i> Exporter CSV</button>
+                    <button id="exportXLSXButton" class="btn-success"><i class="fas fa-file-excel"></i> Exporter XLSX</button>
+                    <button id="copyButton" class="btn-secondary"><i class="fas fa-copy"></i> Copier le tableau</button>
+                    <div class="dropdown">
+                        <button type="button" class="btn-secondary"><i class="fas fa-eye-slash"></i> Masquer / Afficher colonnes ▼</button>
+                        <div class="dropdown-content" id="columnDropdown">
+                            {% for key in response.0.keys %}
+                                <label><input type="checkbox" class="col-toggle" data-col="{{ forloop.counter0 }}" checked> {{ key }}</label>
+                            {% endfor %}
+                            <div class="dropdown-buttons">
+                                <button type="button" id="showAllCols" class="btn-primary">Tout afficher</button>
+                                <button type="button" id="hideAllCols" class="btn-secondary">Tout masquer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-block">
+                <h4><i class="fas fa-chart-line"></i> Outils d'Analyse</h4>
+                <div class="control-group full-width">
+                    <button id="undoBtn" class="btn-secondary" disabled><i class="fas fa-undo"></i> Undo</button>
+                    <button id="redoBtn" class="btn-secondary" disabled><i class="fas fa-redo"></i> Redo</button>
+                    <button id="combineBtn" class="btn-primary" hidden><i class="fas fa-compress-alt"></i> Combiner les lignes sélectionnées</button>
+                    <button id="exportBtn" class="btn-success" hidden><i class="fas fa-file-export"></i> Exporter les lignes sélectionnées</button>
+                    <button onclick="detectOutliers()" class="btn-warning"><i class="fas fa-exclamation-triangle"></i> Détecter les valeurs aberrantes</button>
+                    <label>Comparer :</label>
+                    <label>ColX :</label>
+                    <select id="colX"></select>
+                    <label> vs </label> 
+                     <label>ColY :</label>
+                    <select id="colY"></select>
+                    <button onclick="showScatterPlot()" class="btn-primary"><i class="fas fa-chart-line"></i> Comparer</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="chartContainer" style="display:none; width: 100%; max-width: 1630px; height: 700px; margin: 20px auto; background:#fff; border-radius:12px; box-shadow:0px 3px 8px rgba(0,0,0,0.15); padding:10px;">
+ <button id="closeChartButton" style="position: absolute; top: 10px; right: 10px; background: #fff; border: none; font-size: 24px; cursor: pointer;">
+    <i class="fas fa-times-circle" style="color: #dc3545;"></i>
+</button>
+            <canvas id="scatterPlot"></canvas>
+        </div>
+
+        <div id="chartContainerInter" style="margin-top:20px; display:none; font-size:14px; color:#444; background:#eef2f8; padding:15px; border-radius:12px; line-height:1.5; border:1px solid #c8d6e6;">
+            <b>ℹ️ Interprétation du graphique :</b><br><br>
+            <span style="color:#2563eb;">• Points bleus :</span> Chaque point correspond à une valeur réelle du tableau.<br>
+            <span style="color:#dc2626;">• Ligne rouge :</span> C'est la tendance générale (régression linéaire), elle montre comment Y évolue en moyenne quand X change.<br><br>
+            <b>Corrélation :</b><br>
+            • <span style="color:#16a34a;">Positive :</span> quand X augmente, Y augmente aussi.<br>
+            • <span style="color:#f59e0b;">Négative :</span> quand X augmente, Y diminue.<br>
+            • <span style="color:#6b7280;">Aucune :</span> pas de relation claire entre X et Y.<br><br>
+            <b>Force de la corrélation :</b><br>
+            • Forte (r > 0.7 ou r < -0.7) → tendance très nette.<br>
+            • Modérée (0.3 < |r| ≤ 0.7) → tendance visible mais pas parfaite.<br>
+            • Faible (0 < |r| ≤ 0.3) → tendance faible, beaucoup de dispersion.<br><br>
+            <b>Résumé :</b> Ce graphique permet de visualiser rapidement la relation entre deux variables numériques, et la ligne rouge montre la tendance générale.
+        </div>
+        
+        <div class="table-container">
+            <table id="resultTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll"></th>
+                        {% for key in response.0.keys %}
+                            <th>
+                                {{ key }}
+                                <canvas class="sparkline" id="sparkline-{{ forloop.counter0 }}"></canvas>
+                                <div class="tooltip" id="tooltip-{{ forloop.counter0 }}"></div>
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    {% for row in response %}
+                        <tr>
+                            <td><input type="checkbox" class="row-select"></td>
+                            {% for val in row.values %}
+                                <td>{{ val }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+        <div class="histogram-popup" id="histogramPopup"></div>
+        <div id="columnPopup">
+            <canvas id="popupSparkline" width="400" height="80"></canvas>
+            <canvas id="popupMiniBar" width="400" height="80" style="margin-top:10px;"></canvas>
+            <canvas id="popupMovAvg" width="400" height="40" style="margin-top:10px;"></canvas>
+            <div id="popupLegend" style="margin-top:10px; font-size:13px; line-height:1.5;">
+                <strong>Légende des graphiques :</strong><br>
+                <span style="color:#007BFF;">&#9632;</span> <em>Sparkline (mini-graphique linéaire)</em> : montre l'évolution des valeurs de cette colonne à travers les lignes affichées, pour visualiser rapidement les tendances.<br>
+                <span style="color:#28a745;">&#9632;</span> <em>Histogramme (distribution)</em> : indique combien de fois chaque valeur apparaît, pour identifier les plages les plus fréquentes ou les valeurs extrêmes.<br>
+                <span style="color:#fd7e14;">&#9632;</span> <em>Moyenne mobile</em> : représente la tendance générale en lissant les variations ligne par ligne, ce qui permet de voir plus facilement les hausses ou baisses significatives.<br>
+                <span style="color:#6c757d;">ℹ️</span> Ces graphiques sont générés à partir des données visibles après l'application des filtres et tris.
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-container">
+                <div class="footer-column about-us">
+                    <h4>À propos de nous</h4>
+                    <p>
+                        Finorix : L’intelligence au service de vos données
+Le Chatbot Oracle transforme vos questions en actions. Il consulte vos rapports, interprète vos demandes et vous fournit des réponses instantanées pour une productivité maximale.
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/BHLeasing/"><i class="fab fa-facebook-f"></i></a>
+                       
+                     <a href="https://www.bhleasing.tn/" style="display:inline-block; width:40px; height:40px; 
+                   background-color:#red; color:#fff; 
+                   border-radius:50%; text-align:center; 
+                   line-height:40px; font-weight:bold; text-decoration:none;">
+    BHL
+</a>
+
+                        <a href="https://www.linkedin.com/in/aymen-ouerghi-980bba246/"><i class="fab fa-linkedin-in"></i></a>
+                  <hr>
+                  <p>
+
+                  </p>
+                        <img src="{% static 'img/bhleasing.png' %}" alt="Logo Finorix" style="width: 400px; height: 80px; ">
+                    </div>
+                </div>
+
+                <div class="footer-column contact">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> meuble BH Assurance
+Rue Zohra FAIZA, Centre Urbain Nord
+1082 Cité Mahrajène</li>
+                        <li><i class="fas fa-phone-alt"></i> +216 31 389 700 / 31 389 777</li>
+                        <li><i class="fas fa-envelope"></i> ml@BHLeasing.com.tn</li>
+                    </ul>
+                </div>
+
+                <div class="footer-column links">
+                    <h4>Liens rapides</h4>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Accueil</a></li>
+                        <li><a href="https://www.bhleasing.tn/informations-financieres-1.html"><i class="fas fa-chevron-right"></i> INFORMATIONS FINANCIERES</a></li>
+                        <li><a href="https://www.bhleasing.tn/faq-2.html"><i class="fas fa-chevron-right"></i> FAQ</a></li>
+                        <li><a href="https://www.google.com/maps?rlz=1C1CHBF_en-GBTN1093TN1093&gs_lcrp=EgZjaHJvbWUqBggCEEUYOzIGCAAQRRg8MgYIARAjGCcyBggCEEUYOzIOCAMQRRgnGDsYgAQYigUyBggEEEUYOTIGCAUQRRg8MgYIBhBFGDwyBggHEEUYQdIBCDI0MjBqMGo0qAIAsAIB&um=1&ie=UTF-8&fb=1&gl=tn&sa=X&geocode=KZF1-oXFNP0SMSu-h3GeY8NO&daddr=Immeuble+BH+Assurance,+Rue+Zohra+Faiza,+Cit%C3%A9+Mahraj%C3%A8ne+1082"><i class="fas fa-chevron-right"></i> BH LEASING Tunis</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Finorix : Chatbot Oracle. Tous droits réservés.</p>
+            </div>
+        </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script>
+    // Get the chart container and the close button
+    const chartContainer = document.getElementById('chartContainer');
+    const closeChartButton = document.getElementById('closeChartButton');
+
+    // Add an event listener to the close button
+    closeChartButton.addEventListener('click', () => {
+        // Hide the chart container
+        chartContainer.style.display = 'none';
+        // Also hide the interpretation container if it's visible
+        document.getElementById('chartContainerInter').style.display = 'none';
+    });
+</script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+
+       
+        <script>
+            
+        const tbody = document.getElementById("tableBody");
+        const table = document.getElementById("resultTable");
+        const allRows = Array.from(tbody.querySelectorAll("tr"));
+        let filteredRows = allRows;
+        const rowsPerPage = 300;
+        let currentPage = 1;
+
+        // UTILITAIRES
+        function isNumeric(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
+        function parseDateString(str) { str = str.replace(/midnight/i, "00:00"); const d = new Date(str); return isNaN(d) ? null : d; }
+
+        // HIGHLIGHT LIGNE & COLONNE
+        table.addEventListener("mouseover", e => {
+            if (e.target.tagName === "TD") {
+                const index = e.target.cellIndex;
+                table.querySelectorAll("tr").forEach(tr => {
+                    if (tr.cells[index]) tr.cells[index].classList.add("highlight-col");
+                });
+            }
+        });
+        table.addEventListener("mouseout", e => {
+            if (e.target.tagName === "TD") {
+                const index = e.target.cellIndex;
+                table.querySelectorAll("tr").forEach(tr => {
+                    if (tr.cells[index]) tr.cells[index].classList.remove("highlight-col");
+                });
+            }
+        });
+
+        // RENDER TABLE
+        function renderTable() {
+            tbody.innerHTML = "";
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            filteredRows.slice(start, end).forEach(row => tbody.appendChild(row));
+            applyHeatmap();
+            renderPagination();
+            updateStatsTooltips();
+            updateSparklines();
+          
+        }
+
+        // PAGINATION
+        function renderPagination() {
+            const pagination = document.getElementById("pagination");
+            pagination.innerHTML = "";
+            const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement("button");
+                btn.innerText = i;
+                btn.disabled = (i === currentPage);
+                btn.addEventListener("click", () => { currentPage = i; renderTable(); });
+                pagination.appendChild(btn);
+            }
+        }
+
+        // FILTRES ET RECHERCHE
+        const searchInput = document.getElementById("searchInput");
+        const columnSelect = document.getElementById("columnSelect");
+        const numericFilter = document.getElementById("numericFilter");
+        const numOperator = document.getElementById("numOperator");
+        const numValue = document.getElementById("numValue");
+        const dateFilter = document.getElementById("dateFilter");
+        const dateOperator = document.getElementById("dateOperator");
+        const dateValue = document.getElementById("dateValue");
+
+        
+    columnSelect.addEventListener("change", () => {
+    const colIndex = columnSelect.value;
+
+    // Masquer les filtres par défaut
+    numericFilter.style.display = "none";
+    dateFilter.style.display = "none";
+
+    if (colIndex !== "") {
+        const startIndex = 1; // Ignorer la colonne checkbox
+        const actualIndex = parseInt(colIndex) + startIndex;
+
+        // Vérifier si la colonne est numérique
+let isNum = allRows.every(row => {
+    const val = row.cells[actualIndex].textContent.trim().toLowerCase();
+    return val === "" || val === "none" || isNumeric(val);
+});
+
+
+        // Vérifier si la colonne est de type date
+        let isDate = allRows.every(row => {
+            const val = row.cells[actualIndex].textContent.trim();
+            return val === "" || parseDateString(val) !== null;
+        });
+
+        if (isNum) {
+            numericFilter.style.display = "block";
+        } else if (isDate) {
+            dateFilter.style.display = "block";
+        }
+    }
+
+    applyFilters();
+});
+
+
+       function applyFilters() {
+    const colIndex = columnSelect.value;
+    const filterText = searchInput.value.toLowerCase();
+    filteredRows = allRows.filter(row => {
+        // Décaler si colonne checkbox
+        const startIndex = 1; // commencer après checkbox
+        let textMatch = false;
+
+        if(colIndex === "") {
+            // Recherche sur toutes les colonnes sauf checkbox
+            textMatch = Array.from(row.cells).slice(startIndex).some(c => c.textContent.toLowerCase().includes(filterText));
+        } else {
+            const actualIndex = parseInt(colIndex) + startIndex; 
+            textMatch = row.cells[actualIndex].textContent.toLowerCase().includes(filterText);
+        }
+
+        // Filtre numérique et date
+        let numMatch = true, dateMatch = true;
+        if (numericFilter.style.display === "block") {
+            const val = parseFloat(row.cells[parseInt(colIndex)+startIndex].textContent);
+            const num = parseFloat(numValue.value);
+            if(!isNaN(val) && !isNaN(num)) {
+                if(numOperator.value === ">") numMatch = val > num;
+                else if(numOperator.value === "<") numMatch = val < num;
+                else if(numOperator.value === "=") numMatch = val === num;
+            }
+        }
+        if (dateFilter.style.display === "block") {
+            const valDate = parseDateString(row.cells[parseInt(colIndex)+startIndex].textContent);
+            const filterDate = new Date(dateValue.value);
+            if(valDate && !isNaN(filterDate)) {
+                if(dateOperator.value === ">") dateMatch = valDate > filterDate;
+                else if(dateOperator.value === "<") dateMatch = valDate < filterDate;
+                else if(dateOperator.value === "=") dateMatch = valDate.toDateString() === filterDate.toDateString();
+            }
+        }
+
+        return textMatch && numMatch && dateMatch;
+    });
+    currentPage = 1;
+    renderTable();
+}
+
+        searchInput.addEventListener("input", () => { saveState(false); applyFilters(); });
+        numValue.addEventListener("input", () => { saveState(false); applyFilters(); });
+        numOperator.addEventListener("change", () => { saveState(false); applyFilters(); });
+        dateValue.addEventListener("change", () => { saveState(false); applyFilters(); });
+        dateOperator.addEventListener("change", () => { saveState(false); applyFilters(); });
+
+        // TRI
+        const sortColumn = document.getElementById("sortColumn");
+        const sortOrder = document.getElementById("sortOrder");
+document.getElementById("sortButton").addEventListener("click", e => {
+    e.preventDefault();
+    saveState(false);
+    const colIndex = sortColumn.value;
+    const order = sortOrder.value;
+    if(colIndex === "") return;
+    const startIndex = 1; // ignorer checkbox
+    const actualIndex = parseInt(colIndex) + startIndex;
+
+    filteredRows.sort((a, b) => {
+        const aText = a.cells[actualIndex].textContent.trim();
+        const bText = b.cells[actualIndex].textContent.trim();
+        const aNum = parseFloat(aText);
+        const bNum = parseFloat(bText);
+        const aDate = parseDateString(aText);
+        const bDate = parseDateString(bText);
+
+        if(!isNaN(aNum) && !isNaN(bNum)) return order === "asc" ? aNum - bNum : bNum - aNum;
+        if(aDate && bDate) return order === "asc" ? aDate - bDate : bDate - aDate;
+        return order === "asc" ? aText.localeCompare(bText) : bText.localeCompare(aText);
+    });
+
+    currentPage = 1;
+    renderTable();
+});
+
+
+ // RESET FILTRES & TRI
+document.getElementById("resetButton").addEventListener("click", () => {
+    // Réinitialiser filtres
+    searchInput.value = "";
+    columnSelect.value = "";
+    numValue.value = "";
+    numOperator.value = ">";
+    dateValue.value = "";
+    dateOperator.value = ">";
+    numericFilter.style.display = "none";
+    dateFilter.style.display = "none";
+
+    // Réinitialiser tri
+    sortColumn.value = "";
+    sortOrder.value = "asc";
+
+    // Réinitialiser colonnes masquées et forcer l'affichage
+    colToggles.forEach(chk => {
+        chk.checked = true;
+        const colIndex = parseInt(chk.dataset.col) + 1; // +1 pour checkbox
+        document.querySelectorAll(`#resultTable tr`).forEach(row => {
+            if(row.cells[colIndex]) row.cells[colIndex].style.display = "";
+        });
+    });
+
+    // Réinitialiser lignes
+    filteredRows = allRows;
+    currentPage = 1;
+    renderTable();
+});
+
+        // MASQUER / AFFICHER COLONNES
+       const colToggles = document.querySelectorAll(".col-toggle");
+colToggles.forEach(chk => {
+    chk.addEventListener("change", () => {
+        const colIndex = parseInt(chk.dataset.col) + 1; // 🔹 +1 pour la colonne checkbox
+        const display = chk.checked ? "" : "none";
+        document.querySelectorAll(`#resultTable tr`).forEach(row => {
+            if(row.cells[colIndex]) row.cells[colIndex].style.display = display;
+        });
+    });
+});
+
+    // Boutons "Afficher tout / Masquer tout"
+    document.getElementById("showAllCols").addEventListener("click", () => {
+        colToggles.forEach(chk => { 
+            chk.checked = true; 
+            chk.dispatchEvent(new Event("change")); 
+        });
+    });
+    document.getElementById("hideAllCols").addEventListener("click", () => {
+        colToggles.forEach(chk => { 
+            chk.checked = false; 
+            chk.dispatchEvent(new Event("change")); 
+        });
+    });
+
+        document.getElementById("showAllCols").addEventListener("click", () => {
+            colToggles.forEach(chk => { chk.checked = true; chk.dispatchEvent(new Event("change")); });
+        });
+        document.getElementById("hideAllCols").addEventListener("click", () => {
+            colToggles.forEach(chk => { chk.checked = false; chk.dispatchEvent(new Event("change")); });
+        });
+
+document.getElementById("exportButton").addEventListener("click", e => {
+    e.preventDefault();
+    let csvContent = "";
+
+    // En-têtes visibles (ignorer checkbox et colonnes masquées)
+    const headers = Array.from(table.querySelectorAll("thead th"))
+                         .slice(1) // ignorer checkbox
+                         .filter(th => th.style.display !== "none")
+                         .map(th => `"${th.textContent.trim()}"`)
+                         .join(",");
+    csvContent += headers + "\n";
+
+    // Lignes
+    filteredRows.forEach(row => {
+        const rowData = Array.from(row.cells)
+                             .slice(1) // ignorer checkbox
+                             .filter(td => td.style.display !== "none")
+                             .map(td => `"${td.textContent.trim()}"`)
+                             .join(",");
+        csvContent += rowData + "\n";
+    });
+
+    const blob = new Blob([csvContent], {type: "text/csv;charset=utf-8;"});
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "resultats.csv";
+    link.click();
+});
+
+
+        // EXPORT XLSX
+        document.getElementById("exportXLSXButton").addEventListener("click", e => {
+            e.preventDefault();
+            const wb = XLSX.utils.book_new();
+            const ws_data = [
+                Array.from(table.querySelectorAll("thead th")).map(th => th.textContent),
+                ...filteredRows.map(row => Array.from(row.cells).map(td => td.textContent))
+            ];
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            XLSX.utils.book_append_sheet(wb, ws, "Resultats");
+            XLSX.writeFile(wb, "resultats.xlsx");
+        });
+
+     // COPIER TABLEAU
+document.getElementById("copyButton").addEventListener("click", e => {
+    e.preventDefault();
+    let text = "";
+
+    // En-têtes visibles (ignorer checkbox et colonnes masquées)
+    const headers = Array.from(table.querySelectorAll("thead th"))
+                         .slice(1) // ignorer checkbox
+                         .filter(th => th.style.display !== "none")
+                         .map(th => th.textContent.trim())
+                         .join("\t");
+    text += headers + "\n";
+
+    // Lignes visibles
+    filteredRows.forEach(row => {
+        const rowData = Array.from(row.cells)
+                             .slice(1) // ignorer checkbox
+                             .filter(td => td.style.display !== "none")
+                             .map(td => td.textContent.trim())
+                             .join("\t");
+        text += rowData + "\n";
+    });
+
+    navigator.clipboard.writeText(text).then(() => {
+        alert("Tableau copié !");
+    }).catch(err => {
+        console.error("Erreur lors de la copie : ", err);
+    });
+});
+
+
+        // --- SPARKLINES ET TOOLTIP ---
+        function updateSparklines() {
+            const headers = table.querySelectorAll("thead th");
+            headers.forEach((th, idx) => {
+                 if(idx === 0) return; // ignorer la colonne checkbox
+                const canvas = th.querySelector(".sparkline");
+                if(!canvas) return;
+                const ctx = canvas.getContext("2d");
+                const vals = filteredRows.map(r => parseFloat(r.cells[idx].textContent)).filter(v => !isNaN(v));
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                if(vals.length === 0) return;
+                const w = canvas.width, h = canvas.height;
+                const min = Math.min(...vals), max = Math.max(...vals);
+                ctx.beginPath();
+                vals.forEach((v,i)=>{ const x=i*(w/vals.length), y=h-((v-min)/(max-min)*h); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+                ctx.strokeStyle = "#007bff"; ctx.lineWidth=1.5; ctx.stroke();
+            });
+        }
+
+        function updateStatsTooltips() {
+            table.querySelectorAll("thead th").forEach((th, idx) => {
+                const tooltip = th.querySelector(".tooltip");
+                const vals = filteredRows.map(r => parseFloat(r.cells[idx].textContent)).filter(v => !isNaN(v));
+                if(vals.length === 0) { tooltip.textContent=""; return; }
+                const sum = vals.reduce((a,b)=>a+b,0);
+                const avg = sum/vals.length;
+                const min = Math.min(...vals);
+                const max = Math.max(...vals);
+                tooltip.textContent = `Count: ${vals.length}\nSum: ${sum.toFixed(2)}\nAvg: ${avg.toFixed(2)}\nMin: ${min}\nMax: ${max}`;
+            });
+        }
+
+        // --- HEATMAP ---
+      // --- HEATMAP ---
+     function applyHeatmap() {
+    const colCount = table.querySelectorAll("thead th").length;
+
+    for (let i = 1; i < colCount; i++) {
+        // Filtrer uniquement les valeurs strictement numériques
+        const vals = filteredRows
+            .map(r => r.cells[i].textContent.trim())
+            .filter(txt => /^-?\d+(\.\d+)?$/.test(txt)) // int ou float
+            .map(Number);
+
+        if (vals.length === 0) continue;
+
+        const min = Math.min(...vals);
+        const max = Math.max(...vals);
+
+        filteredRows.forEach(row => {
+            const td = row.cells[i];
+            if (td) {
+                const txt = td.textContent.trim();
+                if (/^-?\d+(\.\d+)?$/.test(txt)) {
+                    const v = parseFloat(txt);
+                    const ratio = (v - min) / (max - min);
+
+                    const alpha = 0.1 + ratio * 0.9; // plus visible
+                    td.style.backgroundColor = `rgba(0, 123, 255, ${alpha})`;
+                    td.style.color = ratio > 0.5 ? '#fff' : '#000';
+                } else {
+                    // Texte ou valeur non-numérique → pas de couleur
+                    td.style.backgroundColor = "";
+                    td.style.color = "#000";
+                }
+            }
+        });
+    }
+}
+
+        // --- POPUP COLONNE ---
+    // const columnPopup = document.getElementById("columnPopup");
+        const popupSpark = document.getElementById("popupSparkline");
+        const popupMini = document.getElementById("popupMiniBar");
+        const popupMov = document.getElementById("popupMovAvg");
+
+        table.querySelectorAll("thead th").forEach((th, idx) => {
+            const cells = filteredRows.map(r => parseFloat(r.cells[idx].textContent)).filter(v => !isNaN(v));
+            if (cells.length === 0) return;
+
+            th.addEventListener("mouseenter", e => {
+                const rect = th.getBoundingClientRect();
+                columnPopup.style.display = "block";
+
+                const max = Math.max(...cells), min = Math.min(...cells);
+                const w = popupSpark.width, h = popupSpark.height;
+
+                // Sparkline
+                let ctx = popupSpark.getContext("2d");
+                ctx.clearRect(0,0,w,h); ctx.beginPath();
+                cells.forEach((v,i)=>{ const x=i*(w/cells.length), y=h-((v-min)/(max-min)*h); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+                ctx.strokeStyle="#007bff"; ctx.lineWidth=2; ctx.stroke();
+
+                // Mini-bar
+                ctx = popupMini.getContext("2d"); ctx.clearRect(0,0,popupMini.width,popupMini.height);
+                const barW = popupMini.width/cells.length;
+                cells.forEach((v,i)=>{ const y=popupMini.height*((v-min)/(max-min)); ctx.fillStyle="#28a745"; ctx.fillRect(i*barW,popupMini.height-y,barW-1,y); });
+
+                // Moving avg (window=3)
+                ctx = popupMov.getContext("2d"); ctx.clearRect(0,0,popupMov.width,popupMov.height); ctx.beginPath();
+                for(let i=0;i<cells.length;i++){
+                    const windowCells = cells.slice(Math.max(0,i-2), i+1);
+                    const avgW = windowCells.reduce((a,b)=>a+b,0)/windowCells.length;
+                    const x=i*(popupMov.width/cells.length), y=popupMov.height-(avgW-min)/(max-min)*popupMov.height;
+                    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+                }
+                ctx.strokeStyle="#ff6600"; ctx.lineWidth=2; ctx.stroke();
+            });
+
+            th.addEventListener("mouseleave", ()=>{ columnPopup.style.display="none"; });
+        });
+
+        // --- INIT ---
+        renderTable();
+
+        </script>
+
+        <script>
+        let activeColIndex = null; // colonne actuellement affichée
+
+        function showColumnPopup(colIndex, event) {
+            const popup = document.getElementById("histogramPopup");
+
+            // --- Toggle : si la même colonne est recliquée -> fermer ---
+            if (activeColIndex === colIndex && popup.style.display === "block") {
+                hideColumnPopup();
+                return;
+            }
+            activeColIndex = colIndex;
+
+            const cells = filteredRows.map(r => parseFloat(r.cells[colIndex].textContent)).filter(v => !isNaN(v));
+            if (cells.length === 0) return;
+
+            const min = Math.min(...cells);
+            const max = Math.max(...cells);
+            const sum = cells.reduce((a,b)=>a+b,0);
+            const avg = sum / cells.length;
+
+            const sorted = [...cells].sort((a,b)=>a-b);
+            const median = sorted.length % 2 === 0 ? 
+                (sorted[sorted.length/2 - 1] + sorted[sorted.length/2]) / 2 
+                : sorted[Math.floor(sorted.length/2)];
+
+            const importantValues = [
+                {label: "Min", value: min, color:"#007bff"},
+                {label: "Médiane", value: median, color:"#28a745"},
+                {label: "Moyenne", value: avg, color:"#ff6600"},
+                {label: "Max", value: max, color:"#6c757d"}
+            ];
+
+            const width = 420, height = 220;
+            let canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0,0,width,height);
+
+            // Axes
+            ctx.strokeStyle="#333";
+            ctx.beginPath();
+            ctx.moveTo(50,10); ctx.lineTo(50,height-40); ctx.lineTo(width-10,height-40);
+            ctx.stroke();
+
+            // Courbe
+            ctx.beginPath();
+            importantValues.forEach((v,i)=>{
+                const x = 50 + i*(width-60)/(importantValues.length-1);
+                const y = (max!==min) ? height-40 - ((v.value - min)/(max-min)*(height-50)) : height/2;
+                i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+            });
+            ctx.strokeStyle="#007bff"; ctx.lineWidth=2; ctx.stroke();
+
+            // Points + labels
+            importantValues.forEach((v,i)=>{
+                const x = 50 + i*(width-60)/(importantValues.length-1);
+                const y = (max!==min)? height-40 - ((v.value - min)/(max-min)*(height-50)) : height/2;
+                ctx.fillStyle=v.color; ctx.beginPath(); ctx.arc(x,y,5,0,2*Math.PI); ctx.fill();
+                ctx.font="12px Arial"; ctx.textAlign="center";
+                ctx.fillStyle="#000"; ctx.fillText(`${v.label}: ${v.value.toFixed(2)}`, x, y-10);
+            });
+
+            // Tableau des stats
+            let statsTable = `
+            <table class="stats-table">
+                <tr><th>Min</th><th>Médiane</th><th>Moyenne</th><th>Max</th><th>Somme</th></tr>
+                <tr><td>${min}</td><td>${median}</td><td>${avg.toFixed(2)}</td><td>${max}</td><td>${sum.toFixed(2)}</td></tr>
+            </table>
+            `;
+
+            popup.innerHTML = `<strong>Colonne : ${table.querySelectorAll("thead th")[colIndex].textContent}</strong>` + statsTable;
+            popup.appendChild(canvas);
+
+            // --- Popup centrée ---
+            popup.style.left = `50%`;
+            popup.style.top = `50%`;
+            popup.style.transform = `translate(-50%, -50%)`;
+            popup.style.display = "block";
+        }
+
+        function hideColumnPopup(){ 
+            document.getElementById("histogramPopup").style.display="none"; 
+            activeColIndex = null; // réinitialiser
+        }
+
+        // --- Événements : clic sur en-tête ---
+        table.querySelectorAll("thead th").forEach((th, idx)=>{
+          let isNum = allRows.every(r => {
+            const val = r.cells[idx].textContent.trim().toLowerCase();
+            return val === "" || val === "none" || isNumeric(val);
+        });
+            if(isNum){
+                th.addEventListener("click", e => {
+                    showColumnPopup(idx, e);
+                });
+            }
+        });
+
+        // Fermer la popup si on clique ailleurs
+        document.addEventListener("click", function(e) {
+            const popup = document.getElementById("histogramPopup");
+            if (!popup.contains(e.target) && !e.target.closest("th")) {
+                hideColumnPopup();
+            }
+        });
+
+        renderTable();
+
+        
+        </script>
+     <script>
+document.getElementById("combineBtn").addEventListener("click", function () {
+    saveState(false); // <-- sauvegarde avant combinaison
+    const rows = document.querySelectorAll("#tableBody tr");
+    let selectedRows = [];
+
+    // Récupérer les lignes sélectionnées
+    rows.forEach(row => {
+        const cb = row.querySelector(".row-select");
+        if (cb && cb.checked) selectedRows.push(row);
+    });
+
+    if (selectedRows.length < 2) {
+        alert("⚠️ Sélectionne au moins 2 lignes à combiner !");
+        return;
+    }
+
+    const headers = document.querySelectorAll("#resultTable thead th");
+    let combinedRow = [];
+
+    for (let i = 1; i < headers.length; i++) { // i=1 car 0 = checkbox
+        const values = selectedRows.map(r => r.cells[i].textContent.trim());
+
+        if (values.every(v => !isNaN(v) && v !== "")) {
+            // Colonnes numériques → somme
+            combinedRow.push(values.reduce((a, b) => Number(a) + Number(b), 0));
+        } else {
+            // Colonnes textuelles → concat sans doublons
+            const uniqueValues = [...new Set(values)];
+            combinedRow.push(uniqueValues.join(" | "));
+        }
+    }
+
+    // Création de la ligne combinée
+    const tbody = document.getElementById("tableBody");
+    const tr = document.createElement("tr");
+    tr.classList.add("combined-row");
+    tr.style.backgroundColor = "#d1e7dd"; // Couleur de la nouvelle ligne combinée (vert clair)
+
+    // Ajout de la checkbox
+    let td = document.createElement("td");
+    td.innerHTML = "<input type='checkbox' class='row-select'>";
+    tr.appendChild(td);
+
+    // Ajout des cellules
+    combinedRow.forEach(val => {
+        let td = document.createElement("td");
+        td.textContent = val;
+        tr.appendChild(td);
+    });
+
+    // Ajouter la ligne juste après la dernière sélectionnée
+    const lastSelectedRow = selectedRows[selectedRows.length - 1];
+    if (lastSelectedRow.nextSibling) {
+        tbody.insertBefore(tr, lastSelectedRow.nextSibling);
+    } else {
+        tbody.appendChild(tr);
+    }
+
+    // Appliquer une couleur aux lignes utilisées pour la combinaison
+    selectedRows.forEach(r => r.style.backgroundColor = "#e7e7e7ff"); // rouge clair pour les lignes combinées
+
+    // Décocher les lignes sélectionnées
+    selectedRows.forEach(r => r.querySelector(".row-select").checked = false);
+
+    //alert("✅ Nouvelle ligne combinée ajoutée et lignes utilisées surlignées !");
+    showToast("Nouvelle ligne combinée ajoutée et lignes utilisées surlignées !")
+});
+
+</script>
+
+<script>
+// --- MENU CONTEXTUEL MODERNE ---
+const contextMenu = document.createElement("div");
+contextMenu.style.position = "absolute";
+contextMenu.style.background = "#ffffff";
+contextMenu.style.border = "1px solid #ccc";
+contextMenu.style.boxShadow = "0 8px 16px rgba(0,0,0,0.2)";
+contextMenu.style.padding = "5px 0";
+contextMenu.style.borderRadius = "8px";
+contextMenu.style.display = "none";
+contextMenu.style.zIndex = 20000;
+contextMenu.style.minWidth = "220px";
+contextMenu.style.fontFamily = "Arial, sans-serif";
+contextMenu.style.fontSize = "14px";
+contextMenu.style.transition = "opacity 0.2s ease";
+
+// Structure HTML du menu avec groupes
+contextMenu.innerHTML = `
+    <div style="padding:5px 15px; font-weight:bold; color:#555;">Actions générales</div>
+    <div id='ctxCombine' style='cursor:pointer; padding:8px 15px;'>🔗 Combiner les lignes sélectionnées</div>
+    <div id='ctxExport' style='cursor:pointer; padding:8px 15px;'>📄 Exporter les lignes sélectionnées</div>
+    <hr style="margin:5px 0; border:none; border-top:1px solid #eee;">
+
+    <div style="padding:5px 15px; font-weight:bold; color:#555;">Marquage</div>
+    <div id='ctxImportant' style='cursor:pointer; padding:8px 15px;'>⭐ Marquer comme Important</div>
+    <div id='ctxValidated' style='cursor:pointer; padding:8px 15px;'>✅ Marquer comme Validé</div>
+    <div id='ctxUncheck' style='cursor:pointer; padding:8px 15px; color:#e85c5c;'>❌ Décocher tout</div>
+    <hr style="margin:5px 0; border:none; border-top:1px solid #eee;">
+
+    <div style="padding:5px 15px; font-weight:bold; color:#555;">Filtrage</div>
+    <div id='ctxFilter' style='cursor:pointer; padding:8px 15px;'>🔍 Afficher uniquement les lignes sélectionnées</div>
+`;
+document.body.appendChild(contextMenu);
+
+// --- Hover effect ---
+contextMenu.querySelectorAll("div").forEach(item => {
+    if(!item.id) return; // ignorer les titres de groupe
+    item.addEventListener("mouseenter", () => item.style.backgroundColor = "#f0f0f0");
+    item.addEventListener("mouseleave", () => item.style.backgroundColor = "transparent");
+});
+
+// --- Clic droit sur le tableau ---
+table.addEventListener("contextmenu", function(e){
+    e.preventDefault();
+    const row = e.target.closest("tr");
+    if(!row) return;
+
+    const selectedRows = Array.from(table.querySelectorAll(".row-select")).filter(cb => cb.checked);
+    if(selectedRows.length > 0){
+        contextMenu.style.left = e.pageX + "px";
+        contextMenu.style.top = e.pageY + "px";
+        contextMenu.style.opacity = 0;
+        contextMenu.style.display = "block";
+        setTimeout(() => contextMenu.style.opacity = 1, 0);
+    } else {
+        contextMenu.style.display = "none";
+    }
+});
+
+// --- Actions menu contextuel ---
+document.getElementById("ctxCombine").addEventListener("click", () => {
+    contextMenu.style.display = "none";
+    document.getElementById("combineBtn").click();
+});
+
+document.getElementById("ctxExport").addEventListener("click", () => {
+    contextMenu.style.display = "none";
+    document.getElementById("exportBtn").click();
+});
+
+document.getElementById("ctxImportant").addEventListener("click", () => {
+    contextMenu.style.display = "none";
+    saveState(false);
+    document.querySelectorAll(".row-select:checked").forEach(cb => {
+        cb.closest("tr").classList.remove("validated-row");
+        cb.closest("tr").classList.add("important-row");
+    });
+});
+
+document.getElementById("ctxValidated").addEventListener("click", () => {
+    contextMenu.style.display = "none";
+    saveState(false);
+    document.querySelectorAll(".row-select:checked").forEach(cb => {
+        cb.closest("tr").classList.remove("important-row");
+        cb.closest("tr").classList.add("validated-row");
+    });
+});
+
+// 🔹 Nouveau : décocher toutes les cases
+document.getElementById("ctxUncheck").addEventListener("click", () => {
+    contextMenu.style.display = "none";
+    saveState(false);
+    document.querySelectorAll(".row-select:checked").forEach(cb => cb.checked = false);
+});
+
+document.getElementById("ctxFilter").addEventListener("click", () => {
+    contextMenu.style.display = "none";
+    saveState(false);
+    document.querySelectorAll("tbody tr").forEach(r => r.classList.add("hidden-row"));
+    document.querySelectorAll(".row-select:checked").forEach(cb => cb.closest("tr").classList.remove("hidden-row"));
+});
+
+
+// --- Clic ailleurs ferme le menu ---
+document.addEventListener("click", (e) => {
+    if(!contextMenu.contains(e.target)){
+        contextMenu.style.display = "none";
+    }
+});
+</script>
+<script>
+let historyStack = [];
+let redoStack = [];
+function saveState(clearRedo = true) {
+    const state = {
+        rows: Array.from(tbody.rows).map(row => {
+            return Array.from(row.cells).map(td => {
+                const cb = td.querySelector(".row-select");
+                return {
+                    text: td.textContent,
+                    checked: cb ? cb.checked : undefined,
+                    classes: Array.from(td.closest("tr").classList) // sauvegarder classes de la ligne
+                };
+            });
+        }),
+        page: currentPage
+    };
+    historyStack.push(state);
+    if(clearRedo) redoStack = [];
+    updateUndoRedoButtons();
+}
+
+// Activer / désactiver boutons
+function updateUndoRedoButtons() {
+    document.getElementById("undoBtn").disabled = historyStack.length === 0;
+    document.getElementById("redoBtn").disabled = redoStack.length === 0;
+}
+
+// Restaurer un état
+// Modification de restoreState pour ne pas clearRedo
+// Restaurer un état
+// 🔹 Restaurer un état
+function restoreState(state) {
+    tbody.innerHTML = "";
+    state.rows.forEach(rowData => {
+        const tr = document.createElement("tr");
+        if (rowData[0].classes) tr.className = rowData[0].classes.join(" "); // restaurer classes
+        rowData.forEach((cell, i) => {
+            const td = document.createElement("td");
+            if(i === 0) {
+                td.innerHTML = "<input type='checkbox' class='row-select'>";
+                td.querySelector(".row-select").checked = !!cell.checked; // restaurer checked
+            } else {
+                td.textContent = cell.text;
+            }
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+    document.getElementById("chartContainer").style.display = prevState.chartVisible ? "block" : "none";
+    document.getElementById("chartContainerInter").style.display = prevState.chartInterVisible ? "block" : "none";
+
+    currentPage = state.page;
+    filteredRows = Array.from(tbody.querySelectorAll("tr"));
+    renderTable();
+}
+
+
+
+
+</script>
+
+<script>
+// --- Undo ---
+document.getElementById("undoBtn").addEventListener("click", () => {
+    if(historyStack.length === 0) return;
+
+    // Sauvegarde l'état courant dans redoStack
+    const currentState = {
+        rows: Array.from(tbody.rows).map(row =>
+            Array.from(row.cells).map(td => {
+                const cb = td.querySelector(".row-select");
+                return {
+                    text: td.textContent,
+                    checked: cb ? cb.checked : undefined,
+                    classes: Array.from(td.closest("tr").classList)
+                };
+            })
+        ),
+        page: currentPage,
+        chartVisible: document.getElementById("chartContainer").style.display === "block",
+        chartInterVisible: document.getElementById("chartContainerInter").style.display === "block"
+    };
+    redoStack.push(currentState);
+
+    const prevState = historyStack.pop();
+    restoreState(prevState);
+    updateUndoRedoButtons();
+});
+
+// --- Redo ---
+document.getElementById("redoBtn").addEventListener("click", () => {
+    if(redoStack.length === 0) return;
+
+    // Sauvegarde l'état courant dans historyStack
+    const currentState = {
+        rows: Array.from(tbody.rows).map(row =>
+            Array.from(row.cells).map(td => {
+                const cb = td.querySelector(".row-select");
+                return {
+                    text: td.textContent,
+                    checked: cb ? cb.checked : undefined,
+                    classes: Array.from(td.closest("tr").classList)
+                };
+            })
+        ),
+        page: currentPage
+    };
+    historyStack.push(currentState);
+
+    const nextState = redoStack.pop();
+    restoreState(nextState);
+    updateUndoRedoButtons();
+});
+
+
+</script>
+
+<script>
+    document.getElementById("exportBtn").addEventListener("click", function () {
+    const rows = document.querySelectorAll("#tableBody tr");
+    let selectedRows = [];
+
+    // Récupérer les lignes sélectionnées
+    rows.forEach(row => {
+        const cb = row.querySelector(".row-select");
+        if (cb && cb.checked) selectedRows.push(row);
+    });
+
+    if (selectedRows.length === 0) {
+        alert("⚠️ Sélectionne au moins une ligne pour l'export !");
+        return;
+    }
+
+    const headers = Array.from(document.querySelectorAll("#resultTable thead th"))
+        .slice(1) // enlever la checkbox
+        .map(th => th.textContent.trim());
+
+    // Créer le CSV
+    let csv = [headers.join(",")];
+    selectedRows.forEach(row => {
+        let rowData = Array.from(row.cells)
+            .slice(1) // enlever la checkbox
+            .map(td => `"${td.textContent.trim()}"`);
+        csv.push(rowData.join(","));
+    });
+
+    // Télécharger le CSV
+    const blob = new Blob([csv.join("\n")], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "export.csv";
+    link.click();
+});
+
+</script>
+<script>
+function showToast(msg, duration=2000){
+    const toast = document.createElement("div");
+    toast.textContent = msg;
+    toast.style.cssText = "position:fixed;top:20px;right:20px;background:#28a745;color:#fff;padding:10px;border-radius:5px;z-index:20000;";
+    document.body.appendChild(toast);
+    setTimeout(()=>{ toast.remove(); }, duration);
+}
+</script>
+
+<script>
+function detectOutliers() {
+    const table = document.getElementById("tableBody"); 
+    const rows = table.rows;
+    let values = [];
+
+    // Récupérer toutes les valeurs numériques (ignorer la 1ère colonne)
+    for (let i = 0; i < rows.length; i++) { 
+        for (let j = 1; j < rows[i].cells.length; j++) { // <-- commencer à j=1
+            let val = parseFloat(rows[i].cells[j].innerText);
+            if (!isNaN(val)) values.push(val);
+        }
+    }
+
+    if (values.length === 0) return;
+
+    // Trier les valeurs pour calculer Q1 et Q3
+    values.sort((a, b) => a - b);
+    const Q1 = values[Math.floor((values.length - 1) * 0.25)];
+    const Q3 = values[Math.floor((values.length - 1) * 0.75)];
+    const IQR = Q3 - Q1;
+
+    const lowerBound = Q1 - 1.5 * IQR;
+    const upperBound = Q3 + 1.5 * IQR;
+
+    // Mettre en rouge les valeurs aberrantes (ignorer 1ère colonne)
+    for (let i = 0; i < rows.length; i++) {
+        for (let j = 1; j < rows[i].cells.length; j++) {
+            let val = parseFloat(rows[i].cells[j].innerText);
+            if (!isNaN(val) && (val < lowerBound || val > upperBound)) {
+                rows[i].cells[j].style.color = "red";
+            } else {
+                rows[i].cells[j].style.color = "";
+            }
+        }
+    }
+
+    saveState(false);
+}
+</script>
+
+<script>
+    let scatterChart = null;
+
+// Remplit les selects avec les en-têtes du tableau
+function fillColumnSelectors() {
+    const headers = document.querySelectorAll("#resultTable thead th");
+    const rows = document.querySelectorAll("#tableBody tr");
+    const colX = document.getElementById("colX");
+    const colY = document.getElementById("colY");
+
+    // Vider les anciens <option>
+    colX.innerHTML = "";
+    colY.innerHTML = "";
+
+    headers.forEach((h, i) => {
+        if (i === 0) return; // ignorer la colonne "Sélect."
+
+        // Vérifier si la colonne est numérique (int/float)
+        let numericCount = 0;
+        let totalChecked = 0;
+
+        rows.forEach(row => {
+            let cell = row.cells[i];
+            if (cell) {
+                let val = cell.innerText.trim();
+                if (val !== "") {
+                    totalChecked++;
+                    if (!isNaN(parseFloat(val)) && isFinite(val)) {
+                        numericCount++;
+                    }
+                }
+            }
+        });
+
+        // Si majorité numérique → garder
+        if (totalChecked > 0 && numericCount / totalChecked > 0.8) {
+            let opt1 = new Option(h.textContent.trim(), i);
+            let opt2 = new Option(h.textContent.trim(), i);
+            colX.add(opt1);
+            colY.add(opt2);
+        }
+    });
+}
+
+// Fonction principale : affiche scatter plot + corrélation
+function showScatterPlot() {
+    
+    const rows = document.querySelectorAll("#tableBody tr");
+    const colX = parseInt(document.getElementById("colX").value);
+    const colY = parseInt(document.getElementById("colY").value);
+
+    let data = [];
+    let xVals = [];
+    let yVals = [];
+
+    rows.forEach(row => {
+        let x = parseFloat(row.cells[colX]?.innerText);
+        let y = parseFloat(row.cells[colY]?.innerText);
+        if (!isNaN(x) && !isNaN(y)) {
+            data.push({x, y});
+            xVals.push(x);
+            yVals.push(y);
+        }
+    });
+
+    if (xVals.length < 2) {
+        alert("Pas assez de données pour comparer !");
+        return;
+    }
+
+    // Corrélations
+    let pearsonCorr = pearson(xVals, yVals).toFixed(2);
+    let spearmanCorr = spearman(xVals, yVals).toFixed(2);
+
+    // Régression linéaire (moindres carrés)
+    let n = xVals.length;
+    let sumX = xVals.reduce((a,b)=>a+b,0);
+    let sumY = yVals.reduce((a,b)=>a+b,0);
+    let sumXY = xVals.map((xi,i)=>xi*yVals[i]).reduce((a,b)=>a+b,0);
+    let sumX2 = xVals.map(xi=>xi*xi).reduce((a,b)=>a+b,0);
+
+    let slope = (n*sumXY - sumX*sumY) / (n*sumX2 - sumX*sumX);
+    let intercept = (sumY - slope*sumX) / n;
+
+    // Droite de tendance (de minX à maxX)
+    let minX = Math.min(...xVals), maxX = Math.max(...xVals);
+    let regressionLine = [
+        {x: minX, y: slope*minX + intercept},
+        {x: maxX, y: slope*maxX + intercept}
+    ];
+
+    // Détruire ancien graphe si existe
+    if (scatterChart) scatterChart.destroy();
+    document.getElementById("chartContainer").style.display = "block";
+    document.getElementById("chartContainerInter").style.display = "block";
+
+    const ctx = document.getElementById("scatterPlot").getContext("2d");
+   scatterChart = new Chart(ctx, {
+    type: 'scatter',
+    data: {
+        datasets: [
+            {
+                label: "Valeurs réelles (chaque point = une ligne du tableau)",
+                data: data,
+                backgroundColor: "rgba(0,123,255,0.5)",
+                borderColor: "rgba(0,123,255,0.8)",
+                pointRadius: 5,
+                pointHoverRadius: 7
+            },
+            {
+                type: "line",
+                label: "Tendance moyenne",
+                data: regressionLine,
+                borderColor: "red",
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 0
+            }
+        ]
+    },
+ options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    layout: {
+        padding: { top: 20, left: 20, right: 20, bottom: 20 }
+    },
+    plugins: {
+        title: {
+            display: true,
+            text: `Corrélation entre "${document.getElementById("colX").selectedOptions[0].text}" et "${document.getElementById("colY").selectedOptions[0].text}"`,
+            font: { size: 18, weight: "bold" },
+            color: "#333",
+            padding: { bottom: 15 }
+        },
+        subtitle: {
+            display: true,
+            text: `Pearson: ${pearsonCorr}, Spearman: ${spearmanCorr}\n${interpretCorrelation(pearsonCorr)}`,
+            font: { size: 13, style: "italic" },
+            color: "#666",
+            padding: { bottom: 15 }
+        },
+        legend: {
+            position: "bottom",
+            labels: {
+                usePointStyle: true,
+                padding: 15,
+                font: { size: 12 }
+            }
+        },
+        tooltip: {
+            backgroundColor: "rgba(0,0,0,0.7)",
+            titleFont: { size: 13, weight: "bold" },
+            bodyFont: { size: 12 },
+            callbacks: {
+                label: (ctx) => `X: ${ctx.raw.x}, Y: ${ctx.raw.y}`
+            }
+        }
+    },
+    scales: {
+        x: {
+            grid: { color: "rgba(200,200,200,0.3)" },
+            title: { display: true, text: document.getElementById("colX").selectedOptions[0].text, font: { size: 14, weight: "bold" } }
+        },
+        y: {
+            grid: { color: "rgba(200,200,200,0.3)" },
+            title: { display: true, text: document.getElementById("colY").selectedOptions[0].text, font: { size: 14, weight: "bold" } }
+        }
+    }
+}
+
+});
+saveState(false);
+}
+
+// Fonction d’interprétation simple pour l’utilisateur
+function interpretCorrelation(r) {
+    r = parseFloat(r);
+    if (r > 0.7) return `Corrélation forte positive (r = ${r}) : quand X augmente, Y augmente aussi.`;
+    if (r > 0.3) return `Corrélation modérée positive (r = ${r}).`;
+    if (r > 0) return `Corrélation faible positive (r = ${r}).`;
+    if (r < -0.7) return `Corrélation forte négative (r = ${r}) : quand X augmente, Y diminue.`;
+    if (r < -0.3) return `Corrélation modérée négative (r = ${r}).`;
+    if (r < 0) return `Corrélation faible négative (r = ${r}).`;
+    return `Pas de corrélation claire (r ≈ 0).`;
+}
+
+
+// Pearson corrélation
+function pearson(x, y) {
+    let n = x.length;
+    let sumX = x.reduce((a,b)=>a+b,0);
+    let sumY = y.reduce((a,b)=>a+b,0);
+    let sumXY = x.map((xi,i)=>xi*y[i]).reduce((a,b)=>a+b,0);
+    let sumX2 = x.map(xi=>xi*xi).reduce((a,b)=>a+b,0);
+    let sumY2 = y.map(yi=>yi*yi).reduce((a,b)=>a+b,0);
+
+    return (n*sumXY - sumX*sumY) / 
+           Math.sqrt((n*sumX2 - sumX*sumX)*(n*sumY2 - sumY*sumY));
+}
+
+// Spearman corrélation
+function spearman(x, y) {
+    function rank(arr) {
+        return arr.map((v,i)=>[v,i])
+                  .sort((a,b)=>a[0]-b[0])
+                  .map((pair,rank)=>[pair[1],rank+1])
+                  .sort((a,b)=>a[0]-b[0])
+                  .map(p=>p[1]);
+    }
+    const rx = rank(x);
+    const ry = rank(y);
+    return pearson(rx, ry);
+}
+
+// Initialiser selects au chargement
+document.addEventListener("DOMContentLoaded", fillColumnSelectors);
+
+</script>
+
+        {% endif %}
+
+         <!-- FOOTER -->
+
+        </body>
+        </html>
