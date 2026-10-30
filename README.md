@@ -89,15 +89,6 @@ python manage.py runserver
 
 Ouvrir : http://127.0.0.1:8000/
 
-## Sécurité / dépôt public
-
-Avant un push GitHub public, vérifier :
-
-- [ ] Aucun mot de passe / IP interne dans le code
-- [ ] `.env` est bien ignoré
-- [ ] `rapports.json` : OK pour un portfolio (SQL métier de stage) — sinon remplacer par un échantillon anonymisé
-- [ ] Pas de `.exe`, `build/`, `venv/`, `db.sqlite3`
-
 ## Documentation
 
 Voir [`docs/Fiche_Finorix_Complete.md`](docs/Fiche_Finorix_Complete.md) :
